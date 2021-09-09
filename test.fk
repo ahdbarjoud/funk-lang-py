@@ -1,2 +1,5 @@
-println("Fuck you");
-println("Test);
+println("Hello World!");
+println("I'm supposed to say something here but I have no clue what to say here so bye.");
+
+b = 6
+a = b;

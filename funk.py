@@ -161,6 +161,7 @@ while pos <= len(code) - 1:
 
 # Parser
 pos = 0
+program = []
 
 while pos <= len(tokens) - 1:
   if tokens[pos]["type"] == "keyword":
@@ -200,4 +201,24 @@ while pos <= len(tokens) - 1:
       for i in to_print:
         print(i)
 
+  if tokens[pos]["type"] == "operator":
+    if tokens[pos]["value"] == "=":
+      left = tokens[pos-1]
+      pos+= 1
+      right = tokens[pos]
+
+      if left["type"] != "variable" or not right["type"] in ("string", "num", "variable"):
+        raise Exception("Invalid syntax.")
+
+      program.append({
+        "type": "assignment",
+        "operator": "=",
+        "left": left,
+        "right": right
+      })
+
   pos+=1
+
+print(program)
+
+# TODO reposition complicated ASTs below the lexer.
