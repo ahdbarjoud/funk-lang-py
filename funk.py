@@ -1,3 +1,25 @@
+class Token:
+  def __init__(self, typ, value, position, line):
+    self.type, self.value, self.position, self.line = type, value, position, line
+
+class Assignment:
+  def __init__(self, typ, variable, value):
+    self.type, self.variable, self.value = typ, variable, value
+
+  def __str__(self):
+    return f"{{ 'type': 'Assignment', 'type': '{self.type}', 'variable': '{self.variable}', 'value': '{self.value}' }}"
+
+  __repr__ = __str__
+
+class BinaryOperator:
+  def __init__(self, operator, left, right):
+    self.operator, self.left, self.right = operator, left, right
+
+  def __str__(self):
+    return f"{{ 'type': 'BinaryOperator', 'operator': '{self.operator}', 'left': '{self.left}', 'right': '{self.right}' }}"
+
+  __repr__ = __str__
+
 path = './test.fk'
 
 code = open(path).read()
@@ -17,208 +39,204 @@ OPS = [
   '|', '++', '--', '.', '%', '^'
 ]
 
-# Lexer
-tokens = []
+# Don't ask who is "we"
+class Lexer:
+  def __init__(self, code):
+    self.code = code
+    self.pos = 0
+    self.line = 0
+    self.current_char = self.code[self.pos]
+    self.next_char = self.code[self.pos+1]
+    self.code_length = len(code) - 1
+    self.tokens = []
 
-while pos <= len(code) - 1:
-  # If character is any type of bracket. We make a bracket token.
-  if code[pos].isspace():
-    if code[pos] == "\n":
-      tokens.append({
-        "type": "newline",
-        "value": "newline",
-        "position": pos
-      })
-    pos += 1
+  def next(self):
+    # We increment.
+    self.pos += 1
+    if self.pos > self.code_length: # We no go too far.
+      self.current_char = '\0'
+      self.next_char = '\0'
+      return
 
-  elif code[pos] == "(":
-    tokens.append({
-      "type": "lpar",
-      "value": "(",
-      "position": pos,
-    })
-    pos += 1
+    self.current_char = self.code[self.pos] # We set current char.
 
-  elif code[pos] == ")":
-    tokens.append({
-      "type": "rpar",
-      "value": ")",
-      "position": pos,
-    })
-    pos += 1
+    if self.pos+1 > self.code_length:
+      self.next_char = '\0'
+    else:
+      self.next_char = self.code[self.pos + 1] # We set next char.
 
-  elif code[pos] == "{":
-    tokens.append({
-      "type": "lcurl",
-      "value": "{",
-      "position": pos,
-    })
-    pos += 1
+  def parse(self):
+    while self.current_char != "\0":
+      if self.current_char.isspace():
+        if self.current_char == "\n":
+          self.line += 1
+          self.tokens.append({
+            "type": "newline",
+            "value": "newline",
+            "position": pos,
+            "line": self.line
+          })
+        self.next()
 
-  elif code[pos] == "}":
-    tokens.append({
-      "type": "rcurl",
-      "value": "}",
-      "position": pos,
-    })
-    pos += 1
+      elif self.current_char == "(":
+        self.tokens.append({
+          "type": "lpar",
+          "value": "(",
+          "position": self.pos,
+          "line": self.line
+        })
+        self.next()
 
-  elif code[pos] == ";":
-    tokens.append({
-      "type": "semi",
-      "value": ";",
-      "position": pos,
-    })
-    pos += 1
+      elif self.current_char == ")":
+        self.tokens.append({
+          "type": "rpar",
+          "value": ")",
+          "position": self.pos,
+          "line": self.line
+        })
+        self.next()
 
-  elif code[pos] == ",":
-    tokens.append({
-      "type": "comma",
-      "value": ",",
-      "position": pos,
-    })
-    pos += 1
+      elif self.current_char == "{":
+        self.tokens.append({
+          "type": "lcurl",
+          "value": "{",
+          "position": self.pos,
+          "line": self.line
+        })
+        self.next()
 
-  elif code[pos] in ("'", '"'):
-    start_pos = pos
-    last = None
-    first = code[pos]
-    pos += 1
-    string = ""
-    while pos <= len(code) - 1:
-      if code[pos] == "\\":
-        pos+=1
-        if code[pos] == 'n':
-          string+="\n"
-        else:
-          string+=code[pos]
-        pos+=1
-        continue
+      elif self.current_char == "}":
+        self.tokens.append({
+          "type": "rcurl",
+          "value": "}",
+          "position": self.pos,
+          "line": self.line
+        })
+        self.next()
 
-      if first == code[pos]:
-        last = code[pos]
-        pos+=1
+      elif self.current_char == ";":
+        self.tokens.append({
+          "type": "semi",
+          "value": ";",
+          "position": self.pos,
+          "line": self.line
+        })
+        self.next()
+
+      elif self.current_char == ",":
+        self.tokens.append({
+          "type": "comma",
+          "value": ",",
+          "position": self.pos,
+          "line": self.line
+        })
+        self.next()
+
+      elif self.current_char in ('"', "'"):
+        self.parse_string(self.current_char)
+
+      elif self.current_char.isalpha() or self.current_char == "_":
+        self.parse_identifier()
+
+      elif self.current_char in OPS:
+        self.parse_operators()
+
+      elif self.current_char != '\0' and self.current_char.isdigit():
+        self.parse_number()
+
+      else:
+        raise Exception(
+          'Invalid character on {0}:{1}\n  {2}\n  {3}'.format(
+          self.line, self.line, str(self.code).split('\n')[self.line - 1], f"{' ' * (self.line - 1)}^")
+        )
+
+  def parse_string(self, char):
+    string = ''
+    start_pos = self.pos
+    end = False
+
+    while self.current_char != "\0":
+      self.next()
+
+      if self.current_char == char:
+        self.tokens.append({
+          "type": "string",
+          "value": string,
+          "position": start_pos,
+          "line": self.line
+        })
+        self.next()
         break
 
-      string += code[pos]
-      pos+=1
+      if self.current_char == "\\":
+        if self.next_char == "n":
+          string += "\n"
+        else: 
+          string += self.next_char
+        continue
 
-    if not last:
-      raise Exception("Invalid syntax. Missing a quote.")
+      else:
+        string += self.current_char
 
-    tokens.append({
-      "type": "string",
-      "value": string,
-      "position": start_pos
+    if self.current_char == '\0' and not end:
+      raise Exception('A string was not properly enclosed at {0}:{1}\n  {2}\n  {3}'.format(
+        self.line, start_pos, str(self.code).split('\n')[self.line - 1], f"{' ' * (start_pos - 1)}^")
+      )
+
+  def parse_identifier(self):
+    start_pos = self.pos
+    name = ""
+
+    while self.current_char != "\0" and (self.current_char.isalpha() or self.current_char == "_"):
+      name += self.current_char
+      self.next()
+
+    if name in KEYWORDS:
+      self.tokens.append({
+        "type": "keyword",
+        "value": name,
+        "position": start_pos,
+        "line": self.line
+      })
+    else: 
+      self.tokens.append({
+        "type": "variable",
+        "value": name,
+        "position": start_pos,
+        "line": self.line
+      })
+
+  def parse_operators(self):
+    start_pos = self.pos
+    operator = ""
+
+    while self.current_char != "\0" and self.current_char in OPS:
+      operator += self.current_char
+      self.next()
+
+    if not operator in OPS:
+      raise Exception('Invalid operator on {0}:{1}\n  {2}\n  {3}'.format(
+        self.line, start_pos, str(self.code).split('\n')[self.line - 1], f"{' ' * (start_pos - 1)}^")
+      )
+
+    self.tokens.append({
+      "type": "operator",
+      "value": operator,
+      "position": start_pos,
+      "line": self.line
     })
 
-  elif code[pos].isalpha() or code[pos] in ('_'):
-    start_pos = pos
-    var = ""
-    while code[pos] is not None and (code[pos].isalnum() or code[pos] == "_"):
-      var += code[pos]
-      pos += 1
-
-    if var in KEYWORDS:
-      tokens.append({
-        "type": "keyword",
-        "value": var,
-        "position": start_pos
-      })
-      continue
-    tokens.append({
-        "type": "variable",
-        "value": var,
-        "position": start_pos
-      })
-
-  elif code[pos] in OPS:
-    start_pos = pos
-    operator = ""
-    while code[pos] is not None and code[pos] in OPS:
-      operator += code[pos]
-      pos += 1
-
-    if operator in OPS:
-      tokens.append({
-        "type": "operator",
-        "value": operator,
-        "position": start_pos,
-      })
-
-  elif code[pos].isdigit():
-    start_pos = pos
+  def parse_number(self):
+    start_pos = self.pos
     num = ""
-    while code[pos] is not None and not code[pos].isspace() and (code[pos].isdigit()):
-      num += code[pos]
-      pos += 1
-    tokens.append({
-      "type": "num",
+
+    while self.current_char != '\0' and not self.current_char.isspace() and self.current_char.isdigit():
+      num += self.current_char
+      self.next()
+
+    self.tokens.append({
+      "type": "number",
       "value": int(num),
       "position": start_pos,
+      "line": self.line
     })
-    pos += 1
-
-# Parser
-pos = 0
-program = []
-
-while pos <= len(tokens) - 1:
-  if tokens[pos]["type"] == "keyword":
-    if tokens[pos]["value"] == "println":
-      to_print = []
-      lpar = None
-      rpar = None
-      semi = None
-      pos += 1
-      while pos <= len(tokens) - 1:
-        if tokens[pos]["type"] == "lpar":
-          lpar = tokens[pos]
-          pos += 1
-          continue
-        if tokens[pos]["type"] == "rpar":
-          rpar = tokens[pos]
-          pos += 1
-          continue
-        if tokens[pos]["type"] == "semi":
-          semi = tokens[pos]
-
-        if tokens[pos]["type"] in ("newline", "semi", "lcurl", "rcurl"):
-          if tokens[pos]["type"] == "semi" and (not rpar or tokens[pos-1]["position"] != rpar["position"]):
-            raise Exception("Invalid Syntax")
-          break
-
-        to_print.append(tokens[pos]["value"])
-        pos += 1
-
-      if not lpar:
-        raise Exception("Invalid syntax.")
-      if not rpar:
-        raise Exception("Invalid syntax.")
-      if not semi:
-        raise Exception("Invalid syntax.")
-
-      for i in to_print:
-        print(i)
-
-  if tokens[pos]["type"] == "operator":
-    if tokens[pos]["value"] == "=":
-      left = tokens[pos-1]
-      pos+= 1
-      right = tokens[pos]
-
-      if left["type"] != "variable" or not right["type"] in ("string", "num", "variable"):
-        raise Exception("Invalid syntax.")
-
-      program.append({
-        "type": "assignment",
-        "operator": "=",
-        "left": left,
-        "right": right
-      })
-
-  pos+=1
-
-print(program)
-
-# TODO reposition complicated ASTs below the lexer.
