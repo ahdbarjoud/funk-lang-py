@@ -34,6 +34,7 @@ class TokenType(Enum):
   Division = 17
   Add = 18
   Remove = 19
+  Equal = 20
 
 class Token:
   def __init__(self, typ: TokenType, value, position, line):
@@ -45,11 +46,11 @@ class Token:
   __repr__ = __str__
 
 class Assignment:
-  def __init__(self, typ: TokenType, variable, value):
-    self.type, self.variable, self.value = typ, variable, value
+  def __init__(self, variable, value):
+    self.variable, self.value = variable, value
 
   def __str__(self):
-    return f"{{ 'type': 'Assignment', 'type': '{self.type}', 'variable': '{self.variable}', 'value': '{self.value}' }}"
+    return f"{self.variable} = {self.value}"
 
   __repr__ = __str__
 

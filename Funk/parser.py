@@ -27,10 +27,23 @@ class Parser:
   def parse(self):
     while self.current_token != None:
       if self.current_token.type != TokenType.Keyword:
-
-        self.program.append(self.parse_expr())
-
+        exp = self.parse_expr()
+        if not exp:
+          self.next()
+          continue
+        self.program.append(exp)
+        print(type(exp))
+        print()
       self.next()
+
+  def parse_assignment(self):
+    left = self.tokens[self.pos-1]
+    if left.type != TokenType.Variable:
+      raise Exception("Syntax Error: Can only assign to variable.")
+
+    while self.current_token != None and self.current_token.type != TokenType.Newline:
+      self.next()
+      return Assignment(left, self.parse_expr())
 
   def parse_expr(self):
     result = self.parse_term()
@@ -66,7 +79,11 @@ class Parser:
       self.next()
       return n
 
-    elif self.current_token.type == TokenType.Operator and self.current_token.value in ("++","--"):
+    elif self.current_token.type == TokenType.Operator and self.current_token.value in (TokenType.Add, TokenType.Remove):
       n = self.current_token
       self.next()
       return UnaryOperator(n, self.parse_factor())
+
+    elif self.current_token.type in (TokenType.Variable, TokenType.Equal):
+      self.next()
+      return self.parse_assignment()

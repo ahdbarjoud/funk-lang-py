@@ -17,30 +17,31 @@ class Interpreter:
       return
 
     self.current_ast = self.AST[self.pos] # We set current token.
-
     if self.pos+1 > self.ast_length:
       self.next_ast = None
     else:
       self.next_ast = self.AST[self.pos + 1] # We set next token.
 
   def eval(self):
-    while self.current_ast is not None:
-      print(self.eval_ast(self.current_ast))
+    while self.current_ast != None:
+      ev = self.eval_ast(self.current_ast)
+      if ev:
+        print(ev)
       self.next()
 
   def eval_ast(self, ast):
-      if isinstance(ast, BinaryOperator) and ast.operator in (TokenType.Addition, TokenType.Subtraction, TokenType.Multiplication, TokenType.Division):
-        left = self.eval_ast(ast.left)
-        right = self.eval_ast(ast.right)
+    if isinstance(ast, BinaryOperator) and ast.operator in (TokenType.Addition, TokenType.Subtraction, TokenType.Multiplication, TokenType.Division):
+      left = self.eval_ast(ast.left)
+      right = self.eval_ast(ast.right)
 
-        if ast.operator == TokenType.Addition:
-          return left + right
-        if ast.operator == TokenType.Subtraction:
-          return left - right
-        if ast.operator == TokenType.Multiplication:
-          return left * right
-        if ast.operator == TokenType.Division:
-          return left / right
+      if ast.operator == TokenType.Addition:
+        return left + right
+      if ast.operator == TokenType.Subtraction:
+        return left - right
+      if ast.operator == TokenType.Multiplication:
+        return left * right
+      if ast.operator == TokenType.Division:
+        return left / right
 
-      if isinstance(ast, Token) and ast.type == TokenType.Num:
-        return ast.value
+    if isinstance(ast, Token) and ast.type == TokenType.Num:
+      return ast.value

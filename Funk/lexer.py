@@ -141,6 +141,8 @@ class Lexer:
       operator = TokenType.Division
     elif operator == "--":
       operator = TokenType.Division
+    elif operator == "=":
+      operator = TokenType.Equal
 
     self.tokens.append(Token(TokenType.Operator, operator, start_pos, self.line))
 
