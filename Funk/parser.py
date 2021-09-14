@@ -86,6 +86,6 @@ class Parser:
       self.next()
       return UnaryOperator(n, self.parse_factor())
 
-    elif self.current_token.type in (TokenType.Variable, TokenType.Equal):
+    elif self.current_token.type == TokenType.Variable:
       self.next()
       return self.parse_assignment()
