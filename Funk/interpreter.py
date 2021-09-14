@@ -30,17 +30,17 @@ class Interpreter:
       self.next()
 
   def eval_ast(self, ast):
-    if isinstance(ast, BinaryOperator) and ast.operator in (TokenType.Addition, TokenType.Subtraction, TokenType.Multiplication, TokenType.Division):
+    if isinstance(ast, BinaryOperator) and ast.operator in ("+", "-", "*", "/"):
       left = self.eval_ast(ast.left)
       right = self.eval_ast(ast.right)
 
-      if ast.operator == TokenType.Addition:
+      if ast.operator == "+":
         return left + right
-      if ast.operator == TokenType.Subtraction:
+      if ast.operator == "-":
         return left - right
-      if ast.operator == TokenType.Multiplication:
+      if ast.operator == "*":
         return left * right
-      if ast.operator == TokenType.Division:
+      if ast.operator == "/":
         return left / right
 
     if isinstance(ast, Token) and ast.type in (TokenType.Num, TokenType.String):

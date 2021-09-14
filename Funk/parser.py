@@ -24,6 +24,21 @@ class Parser:
     else:
       self.next_token = self.tokens[self.pos + 1] # We set next token.
 
+  def expect(self, item):
+    if not item:
+      return self.next()
+
+    if isinstance(item, tuple):
+      if not self.current_token.type in item and self.current_token.value in item:
+        raise Exception(f"Expected {''.join(i for i in item)} on line: {self.current_token.line+1}.")
+      else:
+        return self.current_token
+
+    if self.current_token.type != item and self.current_token.value != item:
+      raise Exception(f"Expected {item} on line: {self.current_token.line+1}.")
+
+    return self.current_token
+
   def parse(self):
     while self.current_token != None:
       if self.current_token.type != TokenType.Keyword:
@@ -46,7 +61,7 @@ class Parser:
   def parse_expr(self):
     result = self.parse_term()
 
-    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in (TokenType.Addition, TokenType.Subtraction):
+    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("+", "-"):
       op = self.current_token.value
       self.next()
       result = BinaryOperator(op, result, self.parse_expr())
@@ -55,7 +70,7 @@ class Parser:
 
   def parse_term(self):
     result = self.parse_factor()
-    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in (TokenType.Multiplication, TokenType.Division):
+    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("*", "/"):
       op = self.current_token.value
       self.next()
       result = BinaryOperator(op, result, self.parse_factor())
@@ -67,8 +82,9 @@ class Parser:
     if self.current_token.type == TokenType.LPar:
       self.next()
       result = self.parse_expr()
-      if self.current_token is None or self.current_token.type != TokenType.RPar:
-        raise Exception(f"Missing closing parenthesis.")
+
+      self.expect(TokenType.RPar)
+
       self.next()
       return result
 
@@ -88,4 +104,5 @@ class Parser:
 
     elif self.current_token.type == TokenType.Variable:
       self.next()
+      self.expect('=')
       return self.parse_assignment()

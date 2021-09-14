@@ -17,24 +17,17 @@ OPS = [
 class TokenType(Enum):
   Num = 0
   Dec = 1
-  LPar = 3
-  RPar = 4
-  LCurl = 5
-  RCurl = 6
-  String = 7
-  Newline = 8
-  Semi = 9
-  Comma = 10
-  Variable = 11
-  Keyword = 12
-  Operator = 13
-  Addition = 14
-  Subtraction = 15
-  Multiplication = 16
-  Division = 17
-  Add = 18
-  Remove = 19
-  Equal = 20
+  LPar = 2
+  RPar = 3
+  LCurl = 4
+  RCurl = 5
+  String = 6
+  Newline = 7
+  Semi = 8
+  Comma = 9
+  Variable = 10
+  Keyword = 11
+  Operator = 12
 
 class Token:
   def __init__(self, typ: TokenType, value, position, line):
@@ -55,7 +48,7 @@ class Assignment:
   __repr__ = __str__
 
 class BinaryOperator:
-  def __init__(self, operator: TokenType, left, right):
+  def __init__(self, operator, left, right):
     self.operator, self.left, self.right = operator, left, right
 
   def __str__(self):
