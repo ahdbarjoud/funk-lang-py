@@ -1,33 +1,4 @@
-class Token:
-  def __init__(self, typ, value, position, line):
-    self.type, self.value, self.position, self.line = type, value, position, line
-
-class Assignment:
-  def __init__(self, typ, variable, value):
-    self.type, self.variable, self.value = typ, variable, value
-
-  def __str__(self):
-    return f"{{ 'type': 'Assignment', 'type': '{self.type}', 'variable': '{self.variable}', 'value': '{self.value}' }}"
-
-  __repr__ = __str__
-
-class BinaryOperator:
-  def __init__(self, operator, left, right):
-    self.operator, self.left, self.right = operator, left, right
-
-  def __str__(self):
-    return f"{{ 'type': 'BinaryOperator', 'operator': '{self.operator}', 'left': '{self.left}', 'right': '{self.right}' }}"
-
-  __repr__ = __str__
-
-class UnaryOperator:
-  def __init__(self, operator, value):
-    self.operator, self.value = operator, value
-
-  def __str__(self):
-    return f"{{ 'type': 'UnaryOperator', 'operator': '{self.operator}', 'value': '{self.value}' }}"
-
-  __repr__ = __str__
+from classes import *
 
 path = './test.fk'
 
@@ -79,66 +50,31 @@ class Lexer:
       if self.current_char.isspace():
         if self.current_char == "\n":
           self.line += 1
-          self.tokens.append({
-            "type": "newline",
-            "value": "newline",
-            "position": pos,
-            "line": self.line
-          })
+          self.tokens.append(Token(TokenType.Newline, self.current_char, self.pos, self.line))
         self.next()
 
       elif self.current_char == "(":
-        self.tokens.append({
-          "type": "lpar",
-          "value": "(",
-          "position": self.pos,
-          "line": self.line
-        })
+        self.tokens.append(Token(TokenType.LPar, "(", self.pos, self.line))
         self.next()
 
       elif self.current_char == ")":
-        self.tokens.append({
-          "type": "rpar",
-          "value": ")",
-          "position": self.pos,
-          "line": self.line
-        })
+        self.tokens.append(Token(TokenType.RPar, ")", self.pos, self.line))
         self.next()
 
       elif self.current_char == "{":
-        self.tokens.append({
-          "type": "lcurl",
-          "value": "{",
-          "position": self.pos,
-          "line": self.line
-        })
+        self.tokens.append(Token(TokenType.LCurl, "{", self.pos, self.line))
         self.next()
 
       elif self.current_char == "}":
-        self.tokens.append({
-          "type": "rcurl",
-          "value": "}",
-          "position": self.pos,
-          "line": self.line
-        })
+        self.tokens.append(Token(TokenType.RCurl, "}", self.pos, self.line))
         self.next()
 
       elif self.current_char == ";":
-        self.tokens.append({
-          "type": "semi",
-          "value": ";",
-          "position": self.pos,
-          "line": self.line
-        })
+        self.tokens.append(Token(TokenType.Semi, ";", self.pos, self.line))
         self.next()
 
       elif self.current_char == ",":
-        self.tokens.append({
-          "type": "comma",
-          "value": ",",
-          "position": self.pos,
-          "line": self.line
-        })
+        self.tokens.append(Token(TokenType.Comma, ",", self.pos, self.line))
         self.next()
 
       elif self.current_char in ('"', "'"):
@@ -168,12 +104,7 @@ class Lexer:
       self.next()
 
       if self.current_char == char:
-        self.tokens.append({
-          "type": "string",
-          "value": string,
-          "position": start_pos,
-          "line": self.line
-        })
+        self.tokens.append(Token(TokenType.String, string, start_pos, self.line))
         self.next()
         break
 
@@ -201,19 +132,9 @@ class Lexer:
       self.next()
 
     if name in KEYWORDS:
-      self.tokens.append({
-        "type": "keyword",
-        "value": name,
-        "position": start_pos,
-        "line": self.line
-      })
-    else: 
-      self.tokens.append({
-        "type": "variable",
-        "value": name,
-        "position": start_pos,
-        "line": self.line
-      })
+      self.tokens.append(Token(TokenType.Keyword, name, start_pos, self.line))
+    else:
+      self.tokens.append(Token(TokenType.Variable, name, start_pos, self.line))
 
   def parse_operators(self):
     start_pos = self.pos
@@ -228,12 +149,7 @@ class Lexer:
         self.line, start_pos, str(self.code).split('\n')[self.line - 1], f"{' ' * (start_pos - 1)}^")
       )
 
-    self.tokens.append({
-      "type": "operator",
-      "value": operator,
-      "position": start_pos,
-      "line": self.line
-    })
+    self.tokens.append(Token(TokenType.Operator, operator, start_pos, self.line))
 
   def parse_number(self):
     start_pos = self.pos
@@ -243,12 +159,7 @@ class Lexer:
       num += self.current_char
       self.next()
 
-    self.tokens.append({
-      "type": "number",
-      "value": int(num),
-      "position": start_pos,
-      "line": self.line
-    })
+    self.tokens.append(Token(TokenType.Num, int(num), start_pos, self.line))
 
 class Parser:
   def __init__(self, tokens):
@@ -276,7 +187,7 @@ class Parser:
 
   def parse(self):
     while self.current_token != None:
-      if self.current_token["type"] != "keyword":
+      if self.current_token.type != TokenType.Keyword:
 
         self.program.append(self.parse_expr())
 
@@ -285,8 +196,8 @@ class Parser:
   def parse_expr(self):
     result = self.parse_term()
 
-    while self.current_token != None and self.current_token["type"] == "operator" and self.current_token["value"] in ("+", "-"):
-      op = self.current_token["value"]
+    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("+", "-"):
+      op = self.current_token.value
       self.next()
       result = BinaryOperator(op, result, self.parse_expr())
 
@@ -294,8 +205,8 @@ class Parser:
 
   def parse_term(self):
     result = self.parse_factor()
-    while self.current_token != None and self.current_token["type"] == "operator" and self.current_token["value"] in ("*", "/"):
-      op = self.current_token["value"]
+    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("*", "/"):
+      op = self.current_token.value
       self.next()
       result = BinaryOperator(op, result, self.parse_factor())
 
@@ -303,23 +214,23 @@ class Parser:
 
   def parse_factor(self):
     fac = self.current_token
-    if self.current_token["type"] == "lpar":
+    if self.current_token.type == TokenType.LPar:
       self.next()
       result = self.parse_expr()
-      if self.current_token["type"] != "rpar":
-        raise Exception(f"Missing closing parenthesis on line {self.current_token['line']}")
+      if self.current_token.type != TokenType.RPar:
+        raise Exception(f"Missing closing parenthesis on line {self.current_token.line}")
       self.next()
       return result
 
-    elif self.current_token["type"] == "number":
+    elif self.current_token.type == TokenType.Num:
       n = self.current_token
       self.next()
       return n
 
-    elif self.current_token["type"] == "operator" and self.current_token["value"] in ("++","--"):
+    elif self.current_token.type == TokenType.Operator and self.current_token.value in ("++","--"):
       n = self.current_token
       self.next()
-      return UnaryOperator(n["value"], self.parse_factor())
+      return UnaryOperator(n.value, self.parse_factor())
 
 lex = Lexer(code)
 lex.parse()
