@@ -1,4 +1,18 @@
+
 from enum import Enum
+
+KEYWORDS = [
+  'println', 'funk', 'if', 'else', 
+  'elif', 'forloop', 'while', 'each',
+  'true', 'false', 'import', 'null'
+]
+
+OPS = [
+  '+', '-', '/', '*', '=', 
+  '==', '!=', '>', '<', '>=',
+  '<=', ':=', '&&', '||', '&',
+  '|', '++', '--', '.', '%', '^'
+]
 
 class TokenType(Enum):
   Num = 0
