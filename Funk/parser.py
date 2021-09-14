@@ -32,8 +32,6 @@ class Parser:
           self.next()
           continue
         self.program.append(exp)
-        print(type(exp))
-        print()
       self.next()
 
   def parse_assignment(self):
@@ -75,6 +73,10 @@ class Parser:
       return result
 
     elif self.current_token.type == TokenType.Num:
+      n = self.current_token
+      self.next()
+      return n
+    elif self.current_token.type == TokenType.String:
       n = self.current_token
       self.next()
       return n

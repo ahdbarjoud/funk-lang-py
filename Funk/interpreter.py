@@ -43,5 +43,5 @@ class Interpreter:
       if ast.operator == TokenType.Division:
         return left / right
 
-    if isinstance(ast, Token) and ast.type == TokenType.Num:
+    if isinstance(ast, Token) and ast.type in (TokenType.Num, TokenType.String):
       return ast.value
