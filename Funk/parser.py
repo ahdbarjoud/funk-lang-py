@@ -35,16 +35,16 @@ class Parser:
   def parse_expr(self):
     result = self.parse_term()
 
-    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("+", "-"):
+    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in (TokenType.Addition, TokenType.Subtraction):
       op = self.current_token.value
       self.next()
       result = BinaryOperator(op, result, self.parse_expr())
 
-    return result\
+    return result
 
   def parse_term(self):
     result = self.parse_factor()
-    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("*", "/"):
+    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in (TokenType.Multiplication, TokenType.Division):
       op = self.current_token.value
       self.next()
       result = BinaryOperator(op, result, self.parse_factor())
@@ -56,8 +56,8 @@ class Parser:
     if self.current_token.type == TokenType.LPar:
       self.next()
       result = self.parse_expr()
-      if self.current_token.type != TokenType.RPar:
-        raise Exception(f"Missing closing parenthesis on line {self.current_token.line}")
+      if self.current_token is None or self.current_token.type != TokenType.RPar:
+        raise Exception(f"Missing closing parenthesis.")
       self.next()
       return result
 
@@ -69,4 +69,4 @@ class Parser:
     elif self.current_token.type == TokenType.Operator and self.current_token.value in ("++","--"):
       n = self.current_token
       self.next()
-      return UnaryOperator(n.value, self.parse_factor())
+      return UnaryOperator(n, self.parse_factor())

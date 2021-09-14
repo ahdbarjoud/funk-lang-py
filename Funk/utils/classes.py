@@ -32,6 +32,8 @@ class TokenType(Enum):
   Subtraction = 15
   Multiplication = 16
   Division = 17
+  Add = 18
+  Remove = 19
 
 class Token:
   def __init__(self, typ: TokenType, value, position, line):
