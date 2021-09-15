@@ -29,9 +29,9 @@ class Parser:
       return self.next()
 
     if isinstance(item, tuple):
-      if not self.current_token.type in item and self.current_token.value in item:
+      if not self.current_token.type in item and not self.current_token.value in item:
         if error:
-          raise Exception(f"Expected {''.join(i for i in item)} on line: {self.current_token.line+1}.")
+          raise Exception(f"Expected {' or '.join(str(i) for i in item)} on line: {self.current_token.line+1}.")
       else:
         return self.current_token
 
@@ -97,6 +97,32 @@ class Parser:
   
     return params
 
+  def parse_funk_args(self):
+    self.expect(TokenType.LPar)
+    self.next()
+    args = []
+
+    while self.current_token != None:
+      if self.current_token.type == TokenType.RPar:
+        self.expect(TokenType.RPar)
+        self.next()
+        break
+
+      args.append(self.parse_top())
+
+      if self.current_token.type in (TokenType.Newline, TokenType.Comma):
+        self.expect((TokenType.Newline, TokenType.Comma), False)
+      else:
+        self.expect(TokenType.RPar)
+
+      self.next()
+
+    return args
+
+  def parse_call(self, name):
+    args = self.parse_funk_args()
+    return CallExp(name, args)
+
   def parse_assignment(self):
     left = self.tokens[self.pos-1]
     if left.type != TokenType.Variable:
@@ -140,6 +166,7 @@ class Parser:
       n = self.current_token
       self.next()
       return n
+
     elif self.current_token.type == TokenType.String:
       n = self.current_token
       self.next()
@@ -151,6 +178,10 @@ class Parser:
       return UnaryOperator(n, self.parse_factor())
 
     elif self.current_token.type == TokenType.Variable:
+      var = self.current_token
       self.next()
-      self.expect('=')
-      return self.parse_assignment()
+      self.expect(('=', TokenType.LPar))
+      if self.current_token.value == '=':
+        return self.parse_assignment()
+      elif self.current_token.type == TokenType.LPar:
+        return self.parse_call(var.value)

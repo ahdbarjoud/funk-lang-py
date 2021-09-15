@@ -82,3 +82,12 @@ class FunctionParam:
     return f"{{ 'type': '{self.type}', 'name': '{self.name}', 'default': '{self.default}' }}"
 
   __repr__ = __str__
+
+class CallExp:
+  def __init__(self, name, args):
+    self.name, self.args, = name, args
+
+  def __str__(self):
+    return f"{{ 'name': '{self.name}', 'args': '{self.args}' }}"
+
+  __repr__ = __str__

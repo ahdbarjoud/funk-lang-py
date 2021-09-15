@@ -1,4 +1,4 @@
-from .utils.classes import *
+from .utils import classes
 
 class Interpreter:
   def __init__(self, AST):
@@ -31,7 +31,7 @@ class Interpreter:
       self.next()
 
   def eval_ast(self, ast):
-    if isinstance(ast, BinaryOperator) and ast.operator in ("+", "-", "*", "/"):
+    if isinstance(ast, classes.BinaryOperator) and ast.operator in ("+", "-", "*", "/"):
       left = self.eval_ast(ast.left)
       right = self.eval_ast(ast.right)
 
@@ -44,7 +44,7 @@ class Interpreter:
       if ast.operator == "/":
         return left / right
 
-    elif isinstance(ast, UnaryOperator) and ast.operator in ("++", "--"):
+    elif isinstance(ast, classes.UnaryOperator) and ast.operator in ("++", "--"):
       if ast.operator == "++":
         val = self.eval_ast(ast.value)
         val += 1
@@ -54,9 +54,9 @@ class Interpreter:
         val -= 1
         return val
 
-    elif isinstance(ast, Token) and ast.type in (TokenType.Num, TokenType.String):
+    elif isinstance(ast, classes.Token) and ast.type in (classes.TokenType.Num, classes.TokenType.String):
       return ast.value
 
-    elif isinstance(ast, Assignment):
-      if ast.type == TokenType.Variable:
+    elif isinstance(ast, classes.Assignment):
+      if ast.type == classes.TokenType.Variable:
         self.vars[ast.variable] = self.eval_ast(ast.value)
