@@ -43,24 +43,37 @@ class Parser:
 
   def parse(self):
     while self.current_token != None:
-      if self.current_token.type != TokenType.Keyword:
-        exp = self.parse_expr()
-        if not exp:
-          self.next()
-          continue
-        self.program.append(exp)
-      else:
-        if self.current_token.value == "funk":
-          self.next()
-          self.program.append(self.parse_function())
+      a = self.parse_top()
+      if a:
+        self.program.append(a)
+
+  def parse_top(self):
+    if self.current_token.type != TokenType.Keyword:
+      exp = self.parse_expr()
       self.next()
+      return exp
+    else:
+      if self.current_token.value == "funk":
+        self.next()
+        return self.parse_function()
 
   def parse_function(self):
     funk_name = self.expect(TokenType.Variable)
     self.next()
     params = self.parse_funk_params()
-    # body = self.parse_funk_body()
-    return Function(funk_name.value, params, [])
+    body = self.parse_funk_body()
+    return Function(funk_name.value, params, body)
+
+  def parse_funk_body(self):
+    self.expect(TokenType.LCurl)
+    self.next()
+    body = []
+
+    while self.current_token != None and self.current_token.type != TokenType.RCurl:
+      body.append(self.parse_top())
+      self.next()
+    self.expect(TokenType.RCurl)
+    return body
 
   def parse_funk_params(self):
     self.expect(TokenType.LPar)
@@ -73,8 +86,6 @@ class Parser:
         self.next()
         break
       elif self.current_token.type == TokenType.LCurl:
-        self.expect(TokenType.LCurl)
-        self.next()
         break
 
       elif self.current_token.type == TokenType.Variable:
