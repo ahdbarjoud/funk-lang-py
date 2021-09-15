@@ -7,6 +7,7 @@ class Interpreter:
     self.pos = 0
     self.current_ast = self.AST[self.pos]
     self.next_ast = self.AST[self.pos + 1]
+    self.vars = {}
 
   def next(self):
     # We increment.
@@ -43,5 +44,19 @@ class Interpreter:
       if ast.operator == "/":
         return left / right
 
-    if isinstance(ast, Token) and ast.type in (TokenType.Num, TokenType.String):
+    elif isinstance(ast, UnaryOperator) and ast.operator in ("++", "--"):
+      if ast.operator == "++":
+        val = self.eval_ast(ast.value)
+        val += 1
+        return val
+      elif ast.operator == "--":
+        val = self.eval_ast(ast.value)
+        val -= 1
+        return val
+
+    elif isinstance(ast, Token) and ast.type in (TokenType.Num, TokenType.String):
       return ast.value
+
+    elif isinstance(ast, Assignment):
+      if ast.type == TokenType.Variable:
+        self.vars[ast.variable] = self.eval_ast(ast.value)

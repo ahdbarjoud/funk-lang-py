@@ -24,18 +24,20 @@ class Parser:
     else:
       self.next_token = self.tokens[self.pos + 1] # We set next token.
 
-  def expect(self, item):
+  def expect(self, item, error=True):
     if not item:
       return self.next()
 
     if isinstance(item, tuple):
       if not self.current_token.type in item and self.current_token.value in item:
-        raise Exception(f"Expected {''.join(i for i in item)} on line: {self.current_token.line+1}.")
+        if error:
+          raise Exception(f"Expected {''.join(i for i in item)} on line: {self.current_token.line+1}.")
       else:
         return self.current_token
 
     if self.current_token.type != item and self.current_token.value != item:
-      raise Exception(f"Expected {item} on line: {self.current_token.line+1}.")
+      if error:
+        raise Exception(f"Expected {item} on line: {self.current_token.line+1}.")
 
     return self.current_token
 
@@ -47,7 +49,42 @@ class Parser:
           self.next()
           continue
         self.program.append(exp)
+      else:
+        if self.current_token.value == "funk":
+          self.next()
+          self.program.append(self.parse_function())
       self.next()
+
+  def parse_function(self):
+    funk_name = self.expect(TokenType.Variable)
+    self.next()
+    params = self.parse_funk_params()
+    # body = self.parse_funk_body()
+    return Function(funk_name.value, params, [])
+
+  def parse_funk_params(self):
+    self.expect(TokenType.LPar)
+    self.next()
+    params = []
+
+    while self.current_token != None:
+      if self.current_token.type == TokenType.RPar:
+        self.expect(TokenType.RPar)
+        self.next()
+        break
+      elif self.current_token.type == TokenType.LCurl:
+        self.expect(TokenType.LCurl)
+        self.next()
+        break
+
+      elif self.current_token.type == TokenType.Variable:
+        cur = self.current_token
+        self.next()
+        self.expect((TokenType.Comma, TokenType.RPar))
+        params.append(FunctionParam(cur.value, cur.type, None))
+        self.next()
+  
+    return params
 
   def parse_assignment(self):
     left = self.tokens[self.pos-1]
@@ -56,7 +93,7 @@ class Parser:
 
     while self.current_token != None and self.current_token.type != TokenType.Newline:
       self.next()
-      return Assignment(left, self.parse_expr())
+      return Assignment(TokenType.Variable, left.value, self.parse_expr())
 
   def parse_expr(self):
     result = self.parse_term()
@@ -97,8 +134,8 @@ class Parser:
       self.next()
       return n
 
-    elif self.current_token.type == TokenType.Operator and self.current_token.value in (TokenType.Add, TokenType.Remove):
-      n = self.current_token
+    elif self.current_token.type == TokenType.Operator and self.current_token.value in ("++", "--"):
+      n = self.current_token.value
       self.next()
       return UnaryOperator(n, self.parse_factor())
 

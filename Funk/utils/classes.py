@@ -39,8 +39,8 @@ class Token:
   __repr__ = __str__
 
 class Assignment:
-  def __init__(self, variable, value):
-    self.variable, self.value = variable, value
+  def __init__(self, typ, variable, value):
+    self.type, self.variable, self.value = typ, variable, value
 
   def __str__(self):
     return f"{self.variable} = {self.value}"
@@ -57,10 +57,28 @@ class BinaryOperator:
   __repr__ = __str__
 
 class UnaryOperator:
-  def __init__(self, operator: TokenType, value):
+  def __init__(self, operator, value):
     self.operator, self.value = operator, value
 
   def __str__(self):
     return f"{{ 'type': 'UnaryOperator', 'operator': '{self.operator}', 'value': '{self.value}' }}"
+
+  __repr__ = __str__
+
+class Function:
+  def __init__(self, name, params, body):
+    self.name, self.params, self.body = name, params, body
+
+  def __str__(self):
+    return f"{{ 'type': 'Function', 'params': '{self.params}', 'body': '{self.body}' }}"
+
+  __repr__ = __str__
+
+class FunctionParam:
+  def __init__(self, name, typ, default):
+    self.name, self.type, self.default = name, typ, default
+
+  def __str__(self):
+    return f"{{ 'type': '{self.type}', 'name': '{self.name}', 'default': '{self.default}' }}"
 
   __repr__ = __str__

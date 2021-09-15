@@ -9,6 +9,9 @@ pos = 0
 
 lex = Lexer(code)
 lex.parse()
+# for i in lex.tokens:
+#   print(i)
+#   print()
 parser = Parser(lex.tokens)
 parser.parse()
 inter = Interpreter(parser.program)
