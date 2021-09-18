@@ -1,3 +1,4 @@
+from os import error
 from .utils.classes import *
 
 class Parser:
@@ -25,41 +26,93 @@ class Parser:
       self.next_token = self.tokens[self.pos + 1] # We set next token.
 
   def expect(self, item, error=True):
+    current = self.current_token
     if not item:
       return self.next()
 
+    self.next()
+
     if isinstance(item, tuple):
-      if not self.current_token.type in item and not self.current_token.value in item:
+      if not current.type in item and not current.value in item:
         if error:
-          raise Exception(f"Expected {' or '.join(str(i) for i in item)} on line: {self.current_token.line+1}.")
+          raise Exception(f"Expected {' or '.join(str(i) for i in item)} on line: {current.line+1}.")
       else:
-        return self.current_token
+        return current
 
-    if self.current_token.type != item and self.current_token.value != item:
+    if current.type != item and current.value != item:
       if error:
-        raise Exception(f"Expected {item} on line: {self.current_token.line+1}.")
+        raise Exception(f"Expected {item} on line: {current.line+1}.")
 
-    return self.current_token
+    return current
 
   def parse(self):
     while self.current_token != None:
-      a = self.parse_top()
-      if a:
-        self.program.append(a)
+      if self.current_token == TokenType.Newline:
+        self.expect(TokenType.Newline)
+        continue
+      exp = self.parse_top()
+      if exp:
+        self.program.append(exp)
+      self.next()
 
   def parse_top(self):
     if self.current_token.type != TokenType.Keyword:
       exp = self.parse_expr()
-      self.next()
       return exp
     else:
       if self.current_token.value == "funk":
-        self.next()
+        self.expect(TokenType.Keyword)
         return self.parse_function()
+
+  def parse_expr(self):
+    result = self.parse_term()
+
+    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("+", "-"):
+      op = self.current_token.value
+      self.expect((TokenType.Operator))
+      result = BinaryOperator(op, result, self.parse_expr())
+
+    return result
+
+  def parse_term(self):
+    result = self.parse_factor()
+
+    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("*", "/"):
+      op = self.current_token.value
+      self.expect((TokenType.Operator))
+      result = BinaryOperator(op, result, self.parse_factor())
+
+    return result
+
+  def parse_factor(self):
+    if self.current_token.type == TokenType.LPar:
+      self.expect(TokenType.LPar)
+      result = self.parse_expr()
+      self.expect(TokenType.RPar)
+      return result
+
+    elif self.current_token.type == TokenType.Num:
+      n = self.current_token
+      self.expect(TokenType.Num)
+      return n
+
+    elif self.current_token.type == TokenType.String:
+      s = self.current_token
+      self.expect(TokenType.String)
+      return s
+
+    elif self.current_token.type == TokenType.Variable:
+      var = self.current_token
+      self.expect(TokenType.Variable)
+
+      if self.current_token.value == '=':
+        return self.parse_assignment()
+
+      elif self.current_token.type == TokenType.LPar:
+        return self.parse_call(var.value)
 
   def parse_function(self):
     funk_name = self.expect(TokenType.Variable)
-    self.next()
     params = self.parse_funk_params()
     body = self.parse_funk_body()
     return Function(funk_name.value, params, body)
@@ -77,45 +130,36 @@ class Parser:
 
   def parse_funk_params(self):
     self.expect(TokenType.LPar)
-    self.next()
     params = []
 
     while self.current_token != None:
       if self.current_token.type == TokenType.RPar:
         self.expect(TokenType.RPar)
-        self.next()
         break
       elif self.current_token.type == TokenType.LCurl:
         break
 
       elif self.current_token.type == TokenType.Variable:
-        cur = self.current_token
-        self.next()
+        cur = self.expect(TokenType.Variable)
         self.expect((TokenType.Comma, TokenType.RPar))
         params.append(FunctionParam(cur.value, cur.type, None))
-        self.next()
   
     return params
 
   def parse_funk_args(self):
     self.expect(TokenType.LPar)
-    self.next()
     args = []
 
     while self.current_token != None:
       if self.current_token.type == TokenType.RPar:
         self.expect(TokenType.RPar)
-        self.next()
         break
 
-      args.append(self.parse_top())
-
       if self.current_token.type in (TokenType.Newline, TokenType.Comma):
-        self.expect((TokenType.Newline, TokenType.Comma), False)
-      else:
-        self.expect(TokenType.RPar)
+        self.expect((TokenType.Newline, TokenType.Comma), error=False)
+        continue
 
-      self.next()
+      args.append(self.parse_top())
 
     return args
 
@@ -131,57 +175,3 @@ class Parser:
     while self.current_token != None and self.current_token.type != TokenType.Newline:
       self.next()
       return Assignment(TokenType.Variable, left.value, self.parse_expr())
-
-  def parse_expr(self):
-    result = self.parse_term()
-
-    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("+", "-"):
-      op = self.current_token.value
-      self.next()
-      result = BinaryOperator(op, result, self.parse_expr())
-
-    return result
-
-  def parse_term(self):
-    result = self.parse_factor()
-    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("*", "/"):
-      op = self.current_token.value
-      self.next()
-      result = BinaryOperator(op, result, self.parse_factor())
-
-    return result
-
-  def parse_factor(self):
-    fac = self.current_token
-    if self.current_token.type == TokenType.LPar:
-      self.next()
-      result = self.parse_expr()
-
-      self.expect(TokenType.RPar)
-
-      self.next()
-      return result
-
-    elif self.current_token.type == TokenType.Num:
-      n = self.current_token
-      self.next()
-      return n
-
-    elif self.current_token.type == TokenType.String:
-      n = self.current_token
-      self.next()
-      return n
-
-    elif self.current_token.type == TokenType.Operator and self.current_token.value in ("++", "--"):
-      n = self.current_token.value
-      self.next()
-      return UnaryOperator(n, self.parse_factor())
-
-    elif self.current_token.type == TokenType.Variable:
-      var = self.current_token
-      self.next()
-      self.expect(('=', TokenType.LPar))
-      if self.current_token.value == '=':
-        return self.parse_assignment()
-      elif self.current_token.type == TokenType.LPar:
-        return self.parse_call(var.value)
