@@ -45,16 +45,6 @@ class Interpreter:
 
       return evals[ast.operator](left, right)
 
-    elif isinstance(ast, classes.UnaryOperator) and ast.operator in ("++", "--"):
-      if ast.operator == "++":
-        val = self.eval_ast(ast.value)
-        val += 1
-        return val
-      elif ast.operator == "--":
-        val = self.eval_ast(ast.value)
-        val -= 1
-        return val
-
     elif isinstance(ast, classes.Token) and ast.type in (classes.TokenType.Num, classes.TokenType.String):
       return ast.value
 
