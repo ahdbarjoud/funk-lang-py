@@ -8,4 +8,4 @@ funk test() {
 
 
 
-println(b)
+println(a)

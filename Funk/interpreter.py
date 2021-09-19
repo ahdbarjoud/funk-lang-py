@@ -46,6 +46,11 @@ class Interpreter:
     elif isinstance(ast, classes.Token) and ast.type in (classes.TokenType.Num, classes.TokenType.String):
       return ast.value
 
+    elif isinstance(ast, classes.Token) and ast.type == classes.TokenType.Variable:
+      if not ast.value in self.vars:
+        raise Exception(f"Variable {ast.value} was never created.")
+      return self.vars[ast.value]
+
     elif isinstance(ast, classes.Assignment):
       if ast.type == classes.TokenType.Variable:
         self.vars[ast.variable] = self.eval_ast(ast.value)
@@ -57,20 +62,13 @@ class Interpreter:
       if ast.name in classes.KEYWORDS:
         if ast.name == "println":
           for i in ast.args:
-            if isinstance(i, classes.BinaryOperator):
-              print(self.eval_ast(i))
-            elif i.type in (classes.TokenType.Num, classes.TokenType.String):
-              print(i.value)
-            elif i.type == classes.TokenType.Variable:
-              if not i.value in self.vars:
-                raise Exception(f"Variable {i.value} was never created.")
-              print(self.vars[i.value])
-        return
+            print(self.eval_ast(i))
+          return
 
-      if not ast.name in self.funks.keys():
+      elif not ast.name in self.funks.keys():
         raise Exception(f"Function {ast.name} is not defined anywhere.")
 
-      if len(ast.args) != len(self.funks[ast.name].params):
+      elif len(ast.args) != len(self.funks[ast.name].params):
         raise Exception(f"Params required by function \"{ast.name}\" and arguments provided do not match.")
 
       for i in self.funks[ast.name].body:
