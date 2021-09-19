@@ -33,9 +33,7 @@ class Interpreter:
 
   def eval(self):
     while self.current_ast != None:
-      ev = self.eval_ast(self.current_ast)
-      if ev:
-        print(ev)
+      self.eval_ast(self.current_ast)
       self.next()
 
   def eval_ast(self, ast):
@@ -56,6 +54,19 @@ class Interpreter:
       self.funks[ast.name] = ast
 
     elif isinstance(ast, classes.CallExp):
+      if ast.name in classes.KEYWORDS:
+        if ast.name == "println":
+          for i in ast.args:
+            if isinstance(i, classes.BinaryOperator):
+              print(self.eval_ast(i))
+            elif i.type in (classes.TokenType.Num, classes.TokenType.String):
+              print(i.value)
+            elif i.type == classes.TokenType.Variable:
+              if not i.value in self.vars:
+                raise Exception(f"Variable {i.value} was never created.")
+              print(self.vars[i.value])
+        return
+
       if not ast.name in self.funks.keys():
         raise Exception(f"Function {ast.name} is not defined anywhere.")
 
@@ -63,4 +74,4 @@ class Interpreter:
         raise Exception(f"Params required by function \"{ast.name}\" and arguments provided do not match.")
 
       for i in self.funks[ast.name].body:
-        self.eval_ast
+        self.eval_ast(i)

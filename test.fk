@@ -1,9 +1,11 @@
 (4 + 9) * 10
 
-a = 5
+a = 5 * 5
 
-funk test(a, b) {
-  5 + 5
+funk test() {
+
 }
 
-test(1 + 1, 2)
+
+
+println(b)

@@ -47,9 +47,6 @@ class Parser:
 
   def parse(self):
     while self.current_token != None:
-      if self.current_token == TokenType.Newline:
-        self.expect(TokenType.Newline)
-        continue
       exp = self.parse_top()
       if exp:
         self.program.append(exp)
@@ -63,6 +60,11 @@ class Parser:
       if self.current_token.value == "funk":
         self.expect(TokenType.Keyword)
         return self.parse_function()
+
+      elif self.current_token.value == "println":
+        name = self.current_token.value
+        self.expect('println')
+        return self.parse_call(name)
 
   def parse_expr(self):
     result = self.parse_term()
@@ -110,6 +112,8 @@ class Parser:
 
       elif self.current_token.type == TokenType.LPar:
         return self.parse_call(var.value)
+
+      return var
 
   def parse_function(self):
     funk_name = self.expect(TokenType.Variable)
