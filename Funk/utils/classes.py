@@ -78,7 +78,7 @@ class FunctionParam:
     self.name, self.type, self.default = name, typ, default
 
   def __str__(self):
-    return f"{{{self.type}, {self.name}, {self.default}}}>"
+    return f"Param: {{{self.type}, {self.name}, {self.default}}}>"
 
   __repr__ = __str__
 
@@ -91,5 +91,11 @@ class CallExp:
 
   __repr__ = __str__
 
-# class Condition:
-#   def __init__(self, typ, exp, )
+class Condition:
+  def __init__(self, typ, exp, body, other):
+    self.type, self.exp, self.body, self.other = typ, exp, body, other
+
+  def __str__(self):
+    return f"Condition: {{{self.exp}, {self.body}, {self.other}}}"
+
+  __repr__ = __str__

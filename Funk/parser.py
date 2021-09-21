@@ -66,10 +66,35 @@ class Parser:
         self.expect('println')
         return self.parse_call(name)
 
+      elif self.current_token.value == "if":
+        cur = self.current_token
+        self.expect('if')
+        return self.parse_conditional(cur)
+
+  def skip_newlines(self):
+    while self.current_token != None and self.current_token.type == TokenType.Newline:
+      self.next()
+
+  def parse_conditional(self, typ):
+    if typ.value == 'else':
+      self.expect('else')
+      return Condition(typ.value, None, self.parse_funk_body(), None)
+
+    self.expect(TokenType.LPar)
+    exp = self.parse_expr()
+    self.expect(TokenType.RPar)
+    body = self.parse_funk_body()
+    self.skip_newlines()
+    other = None
+    if self.current_token.type == TokenType.Keyword and self.current_token.value in ("elif", "else"):
+      other = self.parse_conditional(self.current_token)
+
+    return Condition(typ.value, exp, body, other)
+
   def parse_expr(self):
     result = self.parse_term()
 
-    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("+", "-", "==", "!="):
+    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("+", "-", "==", "!=", ">", "<", ">=", "<="):
       op = self.current_token.value
       self.expect((TokenType.Operator))
       result = BinaryOperator(op, result, self.parse_expr())

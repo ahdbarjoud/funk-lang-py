@@ -15,3 +15,12 @@ a = 'fuck'
 println(a)
 
 println("2" == "2")
+
+println(2 > 1)
+
+if (1 == 1) {
+  println(2)
+}
+else {
+  println("Testing")
+}
