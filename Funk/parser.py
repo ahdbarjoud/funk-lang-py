@@ -68,7 +68,6 @@ class Parser:
 
       elif self.current_token.value == "if":
         cur = self.current_token
-        self.expect('if')
         return self.parse_conditional(cur)
 
   def skip_newlines(self):
@@ -76,8 +75,9 @@ class Parser:
       self.next()
 
   def parse_conditional(self, typ):
+    self.expect(typ.value)
+
     if typ.value == 'else':
-      self.expect('else')
       return Condition(typ.value, None, self.parse_funk_body(), None)
 
     self.expect(TokenType.LPar)
@@ -86,6 +86,7 @@ class Parser:
     body = self.parse_funk_body()
     self.skip_newlines()
     other = None
+
     if self.current_token.type == TokenType.Keyword and self.current_token.value in ("elif", "else"):
       other = self.parse_conditional(self.current_token)
 

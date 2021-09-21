@@ -79,3 +79,10 @@ class Interpreter:
 
       for i in self.funks[ast.name].body:
         self.eval_ast(i)
+
+    elif isinstance(ast, classes.Condition):
+      if self.eval_ast(ast.exp) or ast.exp is None:
+        for i in ast.body:
+          self.eval_ast(i)
+      elif ast.other:
+        self.eval_ast(ast.other)

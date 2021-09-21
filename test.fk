@@ -18,9 +18,12 @@ println("2" == "2")
 
 println(2 > 1)
 
-if (1 == 1) {
-  println(2)
+if (1 == 2) {
+  println("This is if")
+}
+elif (1 != 1) {
+  println("Is is elif")
 }
 else {
-  println("Testing")
+  println("This is else")
 }
