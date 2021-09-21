@@ -6,7 +6,7 @@ class Lexer:
     self.pos = 0
     self.line = 0
     self.current_char = self.code[self.pos]
-    self.next_char = self.code[self.pos+1]
+    self.next_char = '\0'
     self.code_length = len(code) - 1
     self.tokens = []
 
@@ -79,13 +79,13 @@ class Lexer:
     string = ''
     start_pos = self.pos
     end = False
+    self.next()
 
     while self.current_char != "\0":
-      self.next()
-
       if self.current_char == char:
         self.tokens.append(Token(TokenType.String, string, start_pos, self.line))
         self.next()
+        end = True
         break
 
       if self.current_char == "\\":
@@ -97,6 +97,8 @@ class Lexer:
 
       else:
         string += self.current_char
+
+      self.next()
 
     if self.current_char == '\0' and not end:
       raise Exception('A string was not properly enclosed at {0}:{1}\n  {2}\n  {3}'.format(

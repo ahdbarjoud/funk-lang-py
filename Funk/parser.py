@@ -6,7 +6,7 @@ class Parser:
     self.tokens = tokens
     self.pos = 0
     self.current_token = self.tokens[self.pos]
-    self.next_token = self.tokens[self.pos+1]
+    self.next_token = None
     self.tokens_length = len(self.tokens) - 1
     self.program = []
 
@@ -69,7 +69,7 @@ class Parser:
   def parse_expr(self):
     result = self.parse_term()
 
-    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("+", "-"):
+    while self.current_token != None and self.current_token.type == TokenType.Operator and self.current_token.value in ("+", "-", "==", "!="):
       op = self.current_token.value
       self.expect((TokenType.Operator))
       result = BinaryOperator(op, result, self.parse_expr())

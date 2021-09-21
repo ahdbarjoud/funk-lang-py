@@ -5,6 +5,8 @@ evals = {
   "-": lambda a, b: 0 if a - b is None else a - b,
   "*": lambda a, b: 0 if a * b is None else a * b,
   "/": lambda a, b: 0 if a / b is None else a / b,
+  "==": lambda a, b: a == b,
+  "!=": lambda a, b: a != b,
 }
 
 class Interpreter:
@@ -37,7 +39,7 @@ class Interpreter:
       self.next()
 
   def eval_ast(self, ast):
-    if isinstance(ast, classes.BinaryOperator) and ast.operator in ("+", "-", "*", "/"):
+    if isinstance(ast, classes.BinaryOperator) and ast.operator in ("+", "-", "*", "/", "==", "!="):
       left = self.eval_ast(ast.left)
       right = self.eval_ast(ast.right)
 

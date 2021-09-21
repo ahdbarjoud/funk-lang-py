@@ -11,7 +11,8 @@ OPS = [
   '+', '-', '/', '*', '=', 
   '==', '!=', '>', '<', '>=',
   '<=', ':=', '&&', '||', '&',
-  '|', '++', '--', '.', '%', '^'
+  '|', '++', '--', '.', '%', 
+  '^', '!'
 ]
 
 class TokenType(Enum):
@@ -89,3 +90,6 @@ class CallExp:
     return f"Call: {{{self.name}, {self.args}}}"
 
   __repr__ = __str__
+
+# class Condition:
+#   def __init__(self, typ, exp, )
