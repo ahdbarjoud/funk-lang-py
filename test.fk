@@ -21,9 +21,6 @@ println(2 > 1)
 if (1 == 2) {
   println("This is if")
 }
-elif (1 != 1) {
+elif (1 == 1) {
   println("Is is elif")
-}
-else {
-  println("This is else")
 }

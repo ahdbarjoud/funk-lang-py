@@ -87,7 +87,7 @@ class Parser:
     self.skip_newlines()
     other = None
 
-    if self.current_token.type == TokenType.Keyword and self.current_token.value in ("elif", "else"):
+    if self.current_token and self.current_token.type == TokenType.Keyword and self.current_token.value in ("elif", "else"):
       other = self.parse_conditional(self.current_token)
 
     return Condition(typ.value, exp, body, other)
