@@ -227,6 +227,5 @@ class Parser:
 
     if self.current_token and self.current_token.type == TokenType.Keyword and self.current_token.value == "else":
       other = self.parse_while_loop(self.current_token)
-    
-    print(WhileLoop(exp, body, other))
+
     return WhileLoop(exp, body, other)

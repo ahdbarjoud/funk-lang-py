@@ -86,3 +86,11 @@ class Interpreter:
           self.eval_ast(i)
       elif ast.other:
         self.eval_ast(ast.other)
+
+    elif isinstance(ast, classes.WhileLoop):
+      while self.eval_ast(ast.exp) or ast.exp is None:
+        for i in ast.body:
+          self.eval_ast(i)
+      else:
+        if ast.other:
+          self.eval_ast(ast.other)
