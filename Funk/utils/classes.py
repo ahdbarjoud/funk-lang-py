@@ -3,8 +3,8 @@ from enum import Enum
 
 KEYWORDS = [
   'println', 'funk', 'if', 'else', 
-  'elif', 'forloop', 'while', 'each',
-  'true', 'false', 'import', 'null'
+  'elif', 'while', 'each', 'true',
+  'false', 'import', 'null'
 ]
 
 OPS = [
@@ -97,5 +97,14 @@ class Condition:
 
   def __str__(self):
     return f"Condition: {{{self.exp}, {self.body}, {self.other}}}"
+
+  __repr__ = __str__
+
+class WhileLoop:
+  def __init__(self, exp, body, other):
+    self.exp, self.body, self.other = exp, body, other
+
+  def __str__(self):
+    return f"WhileLoop: {{{self.exp}, {self.body}, {self.other}}}"
 
   __repr__ = __str__

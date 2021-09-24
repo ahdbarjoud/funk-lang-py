@@ -1,4 +1,5 @@
 from os import error
+from typing import Type
 from .utils.classes import *
 
 class Parser:
@@ -25,6 +26,10 @@ class Parser:
     else:
       self.next_token = self.tokens[self.pos + 1] # We set next token.
 
+  def skip_newlines(self):
+    while self.current_token != None and self.current_token.type == TokenType.Newline:
+      self.next()
+
   def expect(self, item, error=True):
     current = self.current_token
     if not item:
@@ -47,10 +52,11 @@ class Parser:
 
   def parse(self):
     while self.current_token != None:
+      self.skip_newlines()
       exp = self.parse_top()
       if exp:
         self.program.append(exp)
-      self.next()
+      # self.next()
 
   def parse_top(self):
     if self.current_token.type != TokenType.Keyword:
@@ -70,27 +76,8 @@ class Parser:
         cur = self.current_token
         return self.parse_conditional(cur)
 
-  def skip_newlines(self):
-    while self.current_token != None and self.current_token.type == TokenType.Newline:
-      self.next()
-
-  def parse_conditional(self, typ):
-    self.expect(typ.value)
-
-    if typ.value == 'else':
-      return Condition(typ.value, None, self.parse_funk_body(), None)
-
-    self.expect(TokenType.LPar)
-    exp = self.parse_expr()
-    self.expect(TokenType.RPar)
-    body = self.parse_funk_body()
-    self.skip_newlines()
-    other = None
-
-    if self.current_token and self.current_token.type == TokenType.Keyword and self.current_token.value in ("elif", "else"):
-      other = self.parse_conditional(self.current_token)
-
-    return Condition(typ.value, exp, body, other)
+      elif self.current_token.value == "while":
+        return self.parse_while_loop(self.current_token)
 
   def parse_expr(self):
     result = self.parse_term()
@@ -205,3 +192,41 @@ class Parser:
     while self.current_token != None and self.current_token.type != TokenType.Newline:
       self.next()
       return Assignment(TokenType.Variable, left.value, self.parse_expr())
+
+  def parse_conditional(self, typ):
+    self.expect(typ.value)
+
+    if typ.value == 'else':
+      return Condition(typ.value, None, self.parse_funk_body(), None)
+
+    self.expect(TokenType.LPar)
+    exp = self.parse_expr()
+    self.expect(TokenType.RPar)
+    body = self.parse_funk_body()
+    self.skip_newlines()
+
+    other = None
+
+    if self.current_token and self.current_token.type == TokenType.Keyword and self.current_token.value in ("elif", "else"):
+      other = self.parse_conditional(self.current_token)
+
+    return Condition(typ.value, exp, body, other)
+
+  def parse_while_loop(self, typ):
+    self.expect(typ.value)
+
+    if typ.value == 'else':
+      return Condition(typ.value, None, self.parse_funk_body(), None)
+
+    self.expect(TokenType.LPar)
+    exp = self.parse_expr()
+    self.expect(TokenType.RPar)
+    body = self.parse_funk_body()
+    self.skip_newlines()
+    other = None
+
+    if self.current_token and self.current_token.type == TokenType.Keyword and self.current_token.value == "else":
+      other = self.parse_while_loop(self.current_token)
+    
+    print(WhileLoop(exp, body, other))
+    return WhileLoop(exp, body, other)
