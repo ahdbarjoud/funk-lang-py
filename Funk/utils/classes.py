@@ -12,7 +12,7 @@ OPS = [
   '==', '!=', '>', '<', '>=',
   '<=', ':=', '&&', '||', '&',
   '|', '++', '--', '.', '%', 
-  '^', '!'
+  '^', '!', '+=', '-='
 ]
 
 class TokenType(Enum):
@@ -35,6 +35,42 @@ class Token:
     self.type, self.value, self.position, self.line = typ, value, position, line
   def __str__(self):
     return f"{{{self.type}, {self.value}}}"
+  __repr__ = __str__
+
+class Integer:
+  def __init__(self, value):
+    self.value = value
+
+  def __str__(self):
+    return f"{self.value}"
+
+  __repr__ = __str__
+
+class Decimal:
+  def __init__(self, value):
+    self.value = value
+
+  def __str__(self):
+    return f"{self.value}"
+
+  __repr__ = __str__
+
+class String:
+  def __init__(self, value):
+    self.value = value
+
+  def __str__(self):
+    return f"{self.value}"
+
+  __repr__ = __str__
+
+class Variable:
+  def __init__(self, name, scope='global'):
+    self.name, self.scope = name, scope
+
+  def __str__(self):
+    return f"{{{self.name}, {self.scope}}}"
+
   __repr__ = __str__
 
 class Assignment:

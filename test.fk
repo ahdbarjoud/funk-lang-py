@@ -1,33 +1,9 @@
-(4 + 9) * 10
-
 a = 5
-
-funk test() {
-  println(1+1)
+funk test(yeet) {
+  b = 10
+  println(b)
+  println(yeet)
 }
-
-println("fuck")
-test()
-println(13123 + (2 - 10) * 58)
-
-a = 'fuck'
 
 println(a)
-
-println("2" == "2")
-
-println(2 > 1)
-
-if (1 == 2) {
-  println("This is if")
-}
-elif (1 == 1) {
-  println("Is is elif")
-}
-
-while (1 == 1) {
-  println("eat me daddy")
-}
-else {
-  println("Fuck deez nuts")
-}
+test("Bitches")

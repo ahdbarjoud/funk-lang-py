@@ -1,3 +1,4 @@
+import enum
 from .utils import classes
 
 evals = {
@@ -20,7 +21,9 @@ class Interpreter:
     self.pos = 0
     self.current_ast = self.AST[self.pos]
     self.next_ast = None
-    self.vars = {}
+    self.vars = {'global': {
+
+    }}
     self.funks = {}
 
   def next(self):
@@ -49,17 +52,35 @@ class Interpreter:
 
       return evals[ast.operator](left, right)
 
-    elif isinstance(ast, classes.Token) and ast.type in (classes.TokenType.Num, classes.TokenType.String):
+    elif isinstance(ast, classes.BinaryOperator) and ast.operator in ("+=", "-="):
+      if not isinstance(ast.left, classes.Variable):
+        raise Exception("Can only use increment operators on variablers.")
+      if not isinstance(ast.right, classes.Integer):
+        raise Exception("Can only use Nums with increment operators.")
+      left = ast.left
+      right = self.eval_ast(ast.right)
+
+      if ast.operator == "+=":
+        self.vars[left.scope][left.name] += right
+      else:
+        self.vars[left.scope][left.name] -= right
+
+    elif isinstance(ast, classes.Integer):
       return ast.value
 
-    elif isinstance(ast, classes.Token) and ast.type == classes.TokenType.Variable:
-      if not ast.value in self.vars:
-        raise Exception(f"Variable {ast.value} was never created.")
-      return self.vars[ast.value]
+    elif isinstance(ast, classes.String):
+      return ast.value
+
+    elif isinstance(ast, classes.Variable):
+      if not ast.name in self.vars[ast.scope]:
+        raise Exception(f"Variable {ast.name} was never created.")
+      return self.vars[ast.scope][ast.name]
 
     elif isinstance(ast, classes.Assignment):
       if ast.type == classes.TokenType.Variable:
-        self.vars[ast.variable] = self.eval_ast(ast.value)
+        if not ast.variable.scope in self.vars:
+          self.vars[ast.variable.scope] = {}
+        self.vars[ast.variable.scope][ast.variable.name] = self.eval_ast(ast.value)
 
     elif isinstance(ast, classes.Function):
       self.funks[ast.name] = ast
@@ -77,6 +98,9 @@ class Interpreter:
       elif len(ast.args) != len(self.funks[ast.name].params):
         raise Exception(f"Params required by function \"{ast.name}\" and arguments provided do not match.")
 
+      for index, i in enumerate(ast.args):
+        self.eval_ast(classes.Assignment(classes.TokenType.Variable, classes.Variable(self.funks[ast.name].params[index].name, scope=f'funk:{ast.name}'), i))
+        # self.eval_ast(classes.Assignment(classes.TokenType.Variable, classes.Variable(i.name, f'funk:{ast.name}'), i.value))
       for i in self.funks[ast.name].body:
         self.eval_ast(i)
 
