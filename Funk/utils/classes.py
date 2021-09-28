@@ -11,7 +11,7 @@ OPS = [
   '+', '-', '/', '*', '=', 
   '==', '!=', '>', '<', '>=',
   '<=', ':=', '&&', '||', '&',
-  '|', '++', '--', '.', '%', 
+  '|', '++', '--', '.', '%',
   '^', '!', '+=', '-='
 ]
 
@@ -29,6 +29,8 @@ class TokenType(Enum):
   Variable = 10
   Keyword = 11
   Operator = 12
+  LBrac = 13
+  RBrac = 14
 
 class Token:
   def __init__(self, typ: TokenType, value, position, line):
@@ -70,6 +72,15 @@ class Variable:
 
   def __str__(self):
     return f"{{{self.name}, {self.scope}}}"
+
+  __repr__ = __str__
+
+class Container:
+  def __init__(self, items):
+    self.items = items
+
+  def __str__(self):
+    return f"[{', '.join(self.items)}]"
 
   __repr__ = __str__
 

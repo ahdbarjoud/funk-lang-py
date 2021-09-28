@@ -52,11 +52,10 @@ class Parser:
 
   def parse(self):
     while self.current_token != None:
+      exp = self.parse_top()
+      if exp:
+        self.program.append(exp)
       self.skip_newlines()
-      if self.current_token:
-        exp = self.parse_top()
-        if exp:
-          self.program.append(exp)
 
   def parse_top(self, scope='global'):
     if self.current_token.type != TokenType.Keyword:
@@ -99,12 +98,32 @@ class Parser:
 
     return result
 
+  def parse_container(self, scope='global'):
+    items = []
+    while self.current_token != None:
+      if self.current_token.type == TokenType.RBrac:
+        self.expect(TokenType.RBrac)
+        break
+
+      if self.current_token.type in (TokenType.Newline, TokenType.Comma):
+        self.expect((TokenType.Newline, TokenType.Comma))
+        continue
+
+      items.append(self.parse_expr(scope))
+
+    return items
+
   def parse_factor(self, scope='global'):
     if self.current_token.type == TokenType.LPar:
       self.expect(TokenType.LPar)
       result = self.parse_expr()
       self.expect(TokenType.RPar)
       return result
+
+    elif self.current_token.type == TokenType.LBrac:
+      self.expect(TokenType.LBrac)
+      lis = self.parse_container(scope)
+      return Container(lis)
 
     elif self.current_token.type == TokenType.Num:
       n = self.current_token

@@ -1,9 +1,15 @@
-a = 5
-funk test(yeet) {
-  b = 10
+funk test(yeet, yaat) {
+  b = 10 * 10
   println(b)
   println(yeet)
+  println(yaat)
 }
 
+test("Bitches", 14234)
+
+b = 7
+name = "Ahd"
+
+a = [1, 2, 3, 4, b, name]
+
 println(a)
-test("Bitches")

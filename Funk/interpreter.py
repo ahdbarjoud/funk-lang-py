@@ -1,4 +1,5 @@
 import enum
+from typing import Container
 from .utils import classes
 
 evals = {
@@ -100,7 +101,6 @@ class Interpreter:
 
       for index, i in enumerate(ast.args):
         self.eval_ast(classes.Assignment(classes.TokenType.Variable, classes.Variable(self.funks[ast.name].params[index].name, scope=f'funk:{ast.name}'), i))
-        # self.eval_ast(classes.Assignment(classes.TokenType.Variable, classes.Variable(i.name, f'funk:{ast.name}'), i.value))
       for i in self.funks[ast.name].body:
         self.eval_ast(i)
 
@@ -118,3 +118,7 @@ class Interpreter:
       else:
         if ast.other:
           self.eval_ast(ast.other)
+
+    elif isinstance(ast, classes.Container):
+      ast.items = [self.eval_ast(i) for i in ast.items]
+      return ast.items

@@ -48,6 +48,14 @@ class Lexer:
       elif self.current_char == "}":
         self.tokens.append(Token(TokenType.RCurl, "}", self.pos, self.line))
         self.next()
+      
+      elif self.current_char == "[":
+        self.tokens.append(Token(TokenType.LBrac, "[", self.pos, self.line))
+        self.next()
+
+      elif self.current_char == "]":
+        self.tokens.append(Token(TokenType.RBrac, "]", self.pos, self.line))
+        self.next()
 
       elif self.current_char == ";":
         self.tokens.append(Token(TokenType.Semi, ";", self.pos, self.line))
@@ -89,10 +97,12 @@ class Lexer:
         break
 
       if self.current_char == "\\":
-        if self.next_char == "n":
+        self.next()
+        if self.current_char == "n":
           string += "\n"
         else: 
           string += self.next_char
+        self.next()
         continue
 
       else:
