@@ -1,15 +1,4 @@
-funk test(yeet, yaat) {
-  b = 10 * 10
-  println(b)
-  println(yeet)
-  println(yaat)
-}
+1 + 2 * (8 + 4523)
 
-test("Bitches", 14234)
 
-b = 7
-name = "Ahd"
-
-a = [1, 2, 3, 4, b, name]
-
-println(a)
+"Hello World"
