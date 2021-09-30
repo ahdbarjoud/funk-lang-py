@@ -1,5 +1,7 @@
 1 + 2 * (8 + 4523);
 
+5.564 + 123.12345
+
 Integer a = 100;
 
 funk Integer Test() {

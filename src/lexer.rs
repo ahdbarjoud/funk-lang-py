@@ -1,9 +1,10 @@
 pub mod lexer{
-  const OPEARTORS: [&'static str; 25] = [
+  const OPEARTORS: [&'static str; 28] = [
     "+", "-", "*", "/", "%", "^",
     ">", "<", ">=", "<=", "==", "!=",
     "!", "&", ":", "?", "|", "::", 
-    "#", "&&", "||", "++", "--", "=", "###"
+    "#", "&&", "||", "++", "--", "=", 
+    "###", ".", "..", "..."
   ];
   const KEYWORDS: [&'static str; 18] = [
     "funk", "while", "for", "when", "if",
@@ -173,9 +174,16 @@ pub mod lexer{
 
     fn parse_num(&mut self) -> String {
       let mut num = String::new();
-      while self.current_char != None && self.current_char.unwrap().is_numeric() {
+      let mut dots = 0;
+      while self.current_char != None && (self.current_char.unwrap().is_numeric() || self.current_char.unwrap() == '.') {
         num += &String::from(self.current_char.unwrap());
+        if self.current_char.unwrap() == '.' {
+          dots += 1
+        }
         self.next()
+      }
+      if dots > 1 {
+        panic!("Bad number.");
       }
       return num;
     }
