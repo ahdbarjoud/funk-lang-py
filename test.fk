@@ -1,4 +1,11 @@
-1 + 2 * (8 + 4523)
+1 + 2 * (8 + 4523);
 
+Integer a = 100;
 
-"Hello World"
+funk Integer Test() {
+  String fuck = "Fuck";
+}
+
+"Hello World";
+
+### Hello People

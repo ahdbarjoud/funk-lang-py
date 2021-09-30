@@ -1,15 +1,15 @@
 pub mod lexer{
-  const OPEARTORS: [&'static str; 24] = [
+  const OPEARTORS: [&'static str; 25] = [
     "+", "-", "*", "/", "%", "^",
     ">", "<", ">=", "<=", "==", "!=",
-    "!", "&", ":", "?", "|", "::", "~", "#",
-    "&&", "||", "++", "--"
+    "!", "&", ":", "?", "|", "::", 
+    "#", "&&", "||", "++", "--", "=", "###"
   ];
-  const KEYWORDS: [&'static str; 17] = [
+  const KEYWORDS: [&'static str; 18] = [
     "funk", "while", "for", "when", "if",
     "elseif", "else", "Integer", "String",
-    "Decimal", "klass", "not", "return",
-    "Boolean", "Array", "Hash", "mut"
+    "Decimal", "klass", "in", "return",
+    "Boolean", "Array", "Hash", "mut", "Void"
   ];
 
   #[derive(Debug)]
@@ -26,7 +26,8 @@ pub mod lexer{
     Semi,
     String,
     Operator,
-    Keyword
+    Keyword,
+    Identifier
   }
 
   #[derive(Debug)]
@@ -117,6 +118,14 @@ pub mod lexer{
           let op = self.parse_ops();
           self.tokens.push(Token{ typ: TokenType::Operator, value: op})
         }
+        else if self.current_char.unwrap().is_alphabetic() || self.current_char.unwrap() == '_' {
+          let item = self.parse_identifier(self.current_char.unwrap());
+          if KEYWORDS.contains(&&*item) {
+            self.tokens.push(Token{ typ: TokenType::Keyword, value: item})
+          } else {
+            self.tokens.push(Token{ typ: TokenType::Identifier, value: item})
+          }
+        }
       }
 
       for i in &self.tokens {
@@ -183,6 +192,17 @@ pub mod lexer{
         panic!("Could not recognize {} in file.", op);
       }
       return op
+    }
+
+    fn parse_identifier(&mut self, achar: char) -> String {
+      let mut iden = String::from(achar);
+      self.next();
+
+      while self.current_char != None && (self.current_char.unwrap().is_alphanumeric() || self.current_char.unwrap() == '_') {
+        iden.push(self.current_char.unwrap());
+        self.next();
+      }
+      return iden;
     }
   }
 }
