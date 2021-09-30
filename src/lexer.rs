@@ -1,41 +1,8 @@
 pub mod lexer{
-  const OPEARTORS: [&'static str; 28] = [
-    "+", "-", "*", "/", "%", "^",
-    ">", "<", ">=", "<=", "==", "!=",
-    "!", "&", ":", "?", "|", "::", 
-    "#", "&&", "||", "++", "--", "=", 
-    "###", ".", "..", "..."
-  ];
-  const KEYWORDS: [&'static str; 18] = [
-    "funk", "while", "for", "when", "if",
-    "elseif", "else", "Integer", "String",
-    "Decimal", "klass", "in", "return",
-    "Boolean", "Array", "Hash", "mut", "Void"
-  ];
-
-  #[derive(Debug)]
-  enum TokenType {
-    LPar,
-    RPar,
-    Number,
-    Newline,
-    LCurl,
-    RCurl,
-    LBrac,
-    RBrac,
-    Comma,
-    Semi,
-    String,
-    Operator,
-    Keyword,
-    Identifier
-  }
-
-  #[derive(Debug)]
-  pub struct Token {
-    typ: TokenType,
-    value: String
-  }
+  pub use structs::structs::Token;
+  pub use structs::structs::TokenType;
+  pub use structs::structs::OPEARTORS;
+  pub use structs::structs::KEYWORDS;
 
   #[derive(Debug)]
   pub struct Lexer {

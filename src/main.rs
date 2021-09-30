@@ -2,6 +2,7 @@ use std::fs;
 use std::env;
 
 mod lexer;
+mod structs;
 pub use crate::lexer::lexer::Lexer;
 
 fn main() {
