@@ -28,12 +28,6 @@ pub mod structs {
     String,
     Operator,
     Keyword,
-    Identifier
-  }
-
-  #[derive(Debug)]
-  pub struct Token {
-    pub typ: TokenType,
-    pub value: String
+    Variable
   }
 }

@@ -1,13 +1,3 @@
-1 + 2 * (8 + 4523);
+Integer a = 10;
 
-5.564 + 123.12345
-
-Integer a = 100;
-
-funk Integer Test() {
-  String fuck = "Fuck";
-}
-
-"Hello World";
-
-### Hello People
+Decimal bitch = 131234 + 123131 * (1 + 3123.4212);
