@@ -13,7 +13,7 @@ pub mod structs {
     "Boolean", "Array", "Hash", "mut", "Void"
   ];
 
-  #[derive(Debug)]
+  #[derive(Debug, Clone, PartialEq)]
   pub enum TokenType {
     LPar,
     RPar,
@@ -29,5 +29,29 @@ pub mod structs {
     Operator,
     Keyword,
     Variable
+  }
+
+  #[derive(Debug, Clone, PartialEq)]
+  pub struct Token {
+    pub typ: TokenType,
+    pub value: String,
+    pub line: usize,
+    pub line_pos: usize
+  }
+
+  #[derive(PartialEq, Debug)]
+  pub enum OPS {
+    BiOp,
+    Addition,
+    Multiplication
+  }
+
+  #[derive(PartialEq, Debug)]
+  pub enum AST {
+    BiOpAst(String, Box<AST>, Box<AST>),
+    UnOp(OPS, String, Box<AST>),
+    Number(i64),
+    Decminal(f64),
+    Nothing
   }
 }

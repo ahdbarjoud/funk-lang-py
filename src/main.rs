@@ -6,9 +6,7 @@ mod structs;
 mod parser;
 pub use crate::lexer::lexer::Lexer;
 pub use crate::parser::parser::Parser;
-pub use crate::structs::structs::Token;
-pub use crate::structs::structs::AstType;
-pub use crate::structs::structs::BiOpAst;
+pub use crate::structs::structs::*;
 
 fn main() {
   let args: Vec<String> = env::args().collect();
@@ -22,9 +20,11 @@ fn main() {
 
   let mut lexer = Lexer{ code: String::new(), last_pos: 0, pos: 0, line: 1, line_pos: 0};
   let tokens: Vec<Token> = lexer.lex(code);
-  for i in &tokens {
+
+  let mut parser = Parser{pos: 0, last_pos: tokens.len() - 1, current_token: None, next_token: None, tokens: tokens};
+  let program: Vec<AST> = parser.parse();
+
+  for i in &program {
     println!("{:?}", i);
   }
-
-  let mut parser = Parser{tokens: tokens};
 }
