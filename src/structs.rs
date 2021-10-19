@@ -49,9 +49,8 @@ pub mod structs {
   #[derive(PartialEq, Debug)]
   pub enum AST {
     BiOpAst(String, Box<AST>, Box<AST>),
-    UnOp(OPS, String, Box<AST>),
+    UnOp(String, Box<AST>),
     Number(i64),
-    Decminal(f64),
-    Nothing
+    Decminal(f64)
   }
 }
