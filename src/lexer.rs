@@ -149,7 +149,7 @@ pub mod lexer{
       if KEYWORDS.contains(&&*iden) {
         return Token{typ: TokenType::Keyword, value:iden, line: self.line, line_pos: start};
       }
-      return Token{typ: TokenType::Variable, value:iden, line: self.line, line_pos: start};
+      return Token{typ: TokenType::Identifier, value:iden, line: self.line, line_pos: start};
     }
 
     fn parse_operator(&mut self, iter: &mut Peekable<Iter<char>>, first: &char) -> Token {

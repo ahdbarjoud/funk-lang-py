@@ -28,7 +28,7 @@ pub mod structs {
     String,
     Operator,
     Keyword,
-    Variable
+    Identifier
   }
 
   #[derive(Debug, Clone, PartialEq)]
@@ -40,17 +40,25 @@ pub mod structs {
   }
 
   #[derive(PartialEq, Debug)]
-  pub enum OPS {
-    BiOp,
-    Addition,
-    Multiplication
+  pub struct Integer {
+    pub value: i64
+  }
+  #[derive(PartialEq, Debug)]
+  pub struct Decimal {
+    pub value: f64
+  }
+  #[derive(PartialEq, Debug)]
+  pub struct Str {
+    pub value: String
   }
 
   #[derive(PartialEq, Debug)]
   pub enum AST {
     BiOpAst(String, Box<AST>, Box<AST>),
-    UnOp(String, Box<AST>),
-    Number(i64),
-    Decminal(f64)
+    UnOp(String, String, Box<AST>),
+    Number(Integer),
+    Decminal(Decimal),
+    Str(Str),
+    Assign(String, Box<AST>, String, usize)
   }
 }
