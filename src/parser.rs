@@ -81,11 +81,18 @@ pub mod parser {
     fn parse_top(&mut self) -> AST {
       if self.current_token.as_ref().unwrap().typ != TokenType::Keyword {
         let expr = self.parse_expr(); // This is an expression, so lettus parse it.
+        // println!("{:?}", expr);
+        // println!("{:?}", self.current_token.as_ref().unwrap());
+        // println!("{:?}", self.next_token.as_ref().unwrap());
         self.expect(Some(vec!(TokenType::Semi, TokenType::Newline)), None);
+
         expr
       } else {
         if ["Integer".to_string(), "Decimal".to_string(), "String".to_string()].contains(&self.current_token.as_ref().unwrap().value) {
           self.parse_assignment()
+        } else if self.current_token.as_ref().unwrap().value == "funk" {
+          self.expect(None, Some(vec!("funk".to_string())));
+          self.parse_function()
         } else {
           AST::Number(Integer { value: 0 })
         }
@@ -95,7 +102,8 @@ pub mod parser {
     fn parse_expr(&mut self) -> AST {
       let mut result = self.parse_term();
 
-      if self.current_token != None && self.current_token.as_ref().unwrap().typ == TokenType::Operator && ["+".to_string(), "-".to_string()].contains(&self.current_token.as_ref().unwrap().value) {
+      if self.current_token != None && self.current_token.as_ref().unwrap().typ == TokenType::Operator &&
+      ["+".to_string(), "-".to_string()].contains(&self.current_token.as_ref().unwrap().value) {
         let op: &String = &self.current_token.as_ref().unwrap().value.clone();
         self.expect(Some(vec!(TokenType::Operator)), None);
         result = AST::BiOpAst(op.to_string(), Box::new(result), Box::new(self.parse_expr()));
@@ -111,7 +119,7 @@ pub mod parser {
       ["*".to_string(), "/".to_string()].contains(&self.current_token.as_ref().unwrap().value) {
         let op = &self.current_token.as_ref().unwrap().value.clone();
         self.expect(Some(vec!(TokenType::Operator)), None);
-        result = AST::BiOpAst(op.to_string(), Box::new(result), Box::new(self.parse_factor()));
+        result = AST::BiOpAst(op.to_string(), Box::new(result), Box::new(self.parse_expr()));
       }
 
       result
@@ -159,7 +167,60 @@ pub mod parser {
       let value: AST = self.parse_expr();
       self.expect(Some(vec!(TokenType::Semi, TokenType::Newline)), None);
 
-      AST::Assign(var_name, Box::new(value), "Global".to_string(), line)
+      AST::Assign(Assgignment { name: var_name, value: Box::new(value), scope: "Global".to_string(), line: line })
+    }
+
+    fn parse_function(&mut self) -> AST {
+      let expected_return = self.current_token.clone().unwrap();
+      self.expect(None, Some(vec!("Integer".to_string(), "Decimal".to_string(), "String".to_string())));
+
+      let funk_name = self.current_token.clone().unwrap().value;
+      self.expect(Some(vec!(TokenType::Identifier)), None);
+
+      let params: Vec<AST> = self.parse_funk_params();
+      let body: Vec<AST> = self.parse_body();
+
+      AST::Funk(Funktion { name: funk_name, return_typ: expected_return, params: params, body: body })
+    }
+
+    fn parse_funk_params(&mut self) -> Vec<AST> {
+      let mut params: Vec<AST> = vec!();
+      self.expect(Some(vec!(TokenType::LPar)), None);
+
+      while self.current_token != None {
+        if self.current_token.as_ref().unwrap().typ == TokenType::RPar {
+          self.expect(Some(vec!(TokenType::RPar)), None);
+          break;
+        }
+        else if self.current_token.as_ref().unwrap().typ == TokenType::LCurl {
+          break;
+        }
+
+        let param_typ = self.current_token.clone().unwrap().value;
+        self.expect(None, Some(vec!("Integer".to_string(), "Decimal".to_string(), "String".to_string())));
+        let param_name = self.current_token.clone().unwrap().value;
+        self.expect(Some(vec!(TokenType::Identifier)), None);
+        self.expect(Some(vec!(TokenType::Comma, TokenType::RPar)), None);
+        params.push(AST::FunkParam(FunkParameter { name: param_name, typ: param_typ }))
+      }
+      params
+    }
+
+    fn parse_body(&mut self) -> Vec<AST> {
+      self.expect(Some(vec!(TokenType::LCurl)), None);
+      let mut body: Vec<AST> = vec!();
+
+      while self.current_token != None && self.current_token.as_ref().unwrap().typ != TokenType::RCurl {
+        if self.current_token.as_ref().unwrap().typ == TokenType::Newline {
+          self.next();
+          continue;
+        }
+        // println!("{:?}", self.current_token.as_ref().unwrap());
+        body.push(self.parse_top());
+        self.next();
+      }
+
+      body
     }
   }
 }

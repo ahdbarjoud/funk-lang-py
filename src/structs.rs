@@ -53,12 +53,36 @@ pub mod structs {
   }
 
   #[derive(PartialEq, Debug)]
+  pub struct Assgignment {
+    pub name: String,
+    pub value: Box<AST>,
+    pub scope: String,
+    pub line: usize
+  }
+
+  #[derive(PartialEq, Debug)]
+  pub struct FunkParameter {
+    pub name: String,
+    pub typ: String
+  }
+
+  #[derive(PartialEq, Debug)]
+  pub struct Funktion {
+    pub name: String,
+    pub return_typ: Token,
+    pub params: Vec<AST>,
+    pub body: Vec<AST>
+  }
+
+  #[derive(PartialEq, Debug)]
   pub enum AST {
     BiOpAst(String, Box<AST>, Box<AST>),
     UnOp(String, String, Box<AST>),
     Number(Integer),
     Decminal(Decimal),
     Str(Str),
-    Assign(String, Box<AST>, String, usize)
+    Assign(Assgignment),
+    FunkParam(FunkParameter),
+    Funk(Funktion)
   }
 }

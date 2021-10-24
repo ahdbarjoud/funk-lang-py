@@ -1,3 +1,4 @@
-(1 + 6) + 9 * 8 + 20.22;
 
-Integer test = 1
+funk Integer test(String name, Integer age, Decimal salary) {
+  Integer fuck = 10;
+}

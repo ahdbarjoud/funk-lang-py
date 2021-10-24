@@ -25,6 +25,6 @@ fn main() {
   let program: Vec<AST> = parser.parse();
 
   for i in &program {
-    println!("{:?}", i);
+    println!("{:#?}", i);
   }
 }
