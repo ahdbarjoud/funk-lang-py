@@ -84,7 +84,15 @@ pub mod structs {
 
   #[derive(PartialEq, Debug)]
   pub struct Variable {
-    pub name: String
+    pub name: String,
+    pub value: Box<AST>
+  }
+
+  #[derive(PartialEq, Debug)]
+  pub struct CallItem {
+    pub name: String,
+    pub call_type: String,
+    pub args: Option<Vec<Box<AST>>>
   }
 
   #[derive(PartialEq, Debug)]
@@ -98,6 +106,7 @@ pub mod structs {
     FunkParam(FunkParameter),
     Funk(Funktion),
     Cond(Conditional),
-    Var(Variable)
+    Var(Variable),
+    Call(CallItem)
   }
 }

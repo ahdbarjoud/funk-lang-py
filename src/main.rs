@@ -11,8 +11,7 @@ pub use crate::structs::structs::*;
 fn main() {
   let args: Vec<String> = env::args().collect();
   if args.len() < 2 {
-    panic!("Forgot to mention file to run."
-  );
+    panic!("Forgot to mention file to run.");
   }
   let filename = &args[1];
   let code = fs::read_to_string(filename)
@@ -25,6 +24,6 @@ fn main() {
   let program: Vec<AST> = parser.parse();
 
   for i in &program {
-    println!("{:?}", i);
+    println!("{:#?}", i);
   }
 }

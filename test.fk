@@ -1,9 +1,11 @@
-Integer a = 4;
+Integer a = 5 + 10 * 20
+
+Integer b = 5
 
 funk Integer test(String name, Decimal salary) {
   if (salary == 5.0) {
-    Integer b = 1;
+    print(1+1)
   } else {
-    Integer b = 2;
+    print("Test 2");
   }
 }

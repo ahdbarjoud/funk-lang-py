@@ -1,7 +1,5 @@
 pub mod parser {
   pub use structs::structs::*;
-  // use std::iter::Peekable;
-  // use std::slice::Iter;
 
   #[derive(Debug)]
   pub struct Parser {
@@ -39,16 +37,17 @@ pub mod parser {
       if self.current_token == None {
         self.next();
       } else {
+        let current_token = self.current_token.as_ref().unwrap();
         if typ_tkn != None {
-          if ! typ_tkn.as_ref().unwrap().contains(&self.current_token.as_ref().unwrap().typ) {
+          if ! typ_tkn.as_ref().unwrap().contains(&current_token.typ) {
             panic!("Expected one of: {:?} on line {}, instead found {:?}", typ_tkn.clone().unwrap(),
-              self.current_token.as_ref().unwrap().line, self.current_token.as_ref().unwrap().typ);
+            current_token.line, current_token.typ);
           } else {}
         }
         if typ_str != None {
-          if ! typ_str.unwrap().contains(&self.current_token.as_ref().unwrap().value) {
+          if ! typ_str.unwrap().contains(&current_token.value) {
             panic!("Expected one of: {:?} on line {}, instead found {:?}", typ_tkn.clone().unwrap(),
-              self.current_token.as_ref().unwrap().line, self.current_token.as_ref().unwrap().value);
+            current_token.line, current_token.value);
           } else {}
         }
         self.next();
@@ -67,10 +66,7 @@ pub mod parser {
 
       while self.current_token != None { // Loop until no more token.
         // Skip newlines,  I should make this a funtion.
-        if self.current_token.as_ref().unwrap().typ == TokenType::Newline {
-          self.next();
-          continue;
-        }
+        self.skip_newlines();
         program.push(self.parse_top()); // Call parse top and append result to our program vec.
         self.next(); // Go to next token, repeat the process yeet.
       }
@@ -78,24 +74,26 @@ pub mod parser {
     }
 
     fn parse_top(&mut self) -> AST {
-      if self.current_token.as_ref().unwrap().typ != TokenType::Keyword {
+      let current = self.current_token.clone().unwrap();
+      if current.typ != TokenType::Keyword {
         let expr = self.parse_expr(); // This is an expression, so lettus parse it.
-        // self.expect(Some(vec!(TokenType::Semi, TokenType::Newline)), None);
         expr
       } else {
-        if ["Integer".to_string(), "Decimal".to_string(), "String".to_string()].contains(&self.current_token.as_ref().unwrap().value) {
-          self.parse_assignment()
-        } else if self.current_token.as_ref().unwrap().value == "funk" {
+        if ["Integer".to_string(), "Decimal".to_string(), "String".to_string()].contains(&current.value) {
+          let a = self.parse_assignment();
+          a
+        } else if current.value == "funk" {
           self.expect(None, Some(vec!("funk".to_string())));
           self.parse_function()
-        } else if self.current_token.as_ref().unwrap().value == "if" {
+        } else if current.value == "if" {
           self.parse_conditional()
         }
         else {
           AST::Number(Integer { value: 0 })
         }
       }
-    }
+  }
+    
 
     fn parse_expr(&mut self) -> AST {
       let mut result = self.parse_term();
@@ -122,33 +120,46 @@ pub mod parser {
     }
 
     fn parse_factor(&mut self) -> AST {
-      if self.current_token.as_ref().unwrap().typ == TokenType::Number { // Handle Numbers
-        if self.current_token.as_ref().unwrap().value.contains('.') {
-          let val = self.current_token.as_ref().unwrap().value.parse::<f64>().unwrap(); // Decimal Numbers
+      let current = self.current_token.clone().unwrap();
+
+      if current.typ == TokenType::Number { // Handle Numbers
+        if current.value.contains('.') {
+          let val = current.value.parse::<f64>().unwrap(); // Decimal Numbers
           self.expect(Some(vec!(TokenType::Number)), None);
           AST::Decminal(Decimal { value: val })
         } else { // Integer Numbers
-          let val = self.current_token.as_ref().unwrap().value.parse::<i64>().unwrap();
+          let val = current.value.parse::<i64>().unwrap();
           self.expect(Some(vec!(TokenType::Number)), None);
           AST::Number( Integer { value: val })
         }
       }
 
-      else if self.current_token.as_ref().unwrap().typ == TokenType::String { // Handle Strings
+      else if current.typ == TokenType::String { // Handle Strings
         let val = self.current_token.clone().unwrap().value;
         self.expect(Some(vec!(TokenType::String)), None);
         AST::Str(Str { value: val })
       }
 
-      else if self.current_token.as_ref().unwrap().typ == TokenType::LPar { // Handle Pars
+      else if current.typ == TokenType::LPar { // Handle Pars
         self.expect(Some(vec!(TokenType::LPar)), None);
         let result = self.parse_expr();
         self.expect(Some(vec!(TokenType::RPar)), None);
         return result;
-      } else if self.current_token.as_ref().unwrap().typ == TokenType::Identifier {
-        let var = self.current_token.clone();
+      } 
+
+      else if current.typ == TokenType::Identifier {
+        let var = current;
         self.expect(Some(vec!(TokenType::Identifier)), None);
-        AST::Var(Variable{ name: var.unwrap().value })
+
+        if self.current_token.as_ref().unwrap().typ == TokenType::LPar {
+          let a = self.parse_call(var);
+          a
+        }
+
+        else {
+          AST::Call(CallItem{ name: var.value, call_type: String::from("VariableCall"), args: None })
+        }
+        
       }
 
       else {
@@ -156,8 +167,31 @@ pub mod parser {
       }
     }
 
+    fn parse_call(&mut self, name: Token) -> AST {
+      self.expect(Some(vec!(TokenType::LPar)), None);
+      let args = self.parse_args();
+
+      AST::Call(CallItem{ name: name.value, call_type: String::from("FunctionCall"), args: Some(args) })
+    }
+
+    fn parse_args(&mut self) -> Vec<Box<AST>> {
+      let mut args: Vec<Box<AST>> = vec!();
+
+      while self.current_token != None {
+        if [TokenType::RPar, TokenType::Newline, TokenType::Semi].contains(&self.current_token.as_ref().unwrap().typ) {
+          self.expect(Some(vec!(TokenType::RPar, TokenType::Newline, TokenType::Semi)), None);
+          break;
+        }
+
+        args.push(Box::new(self.parse_expr()));
+        self.expect(Some(vec!(TokenType::Comma, TokenType::RPar)), None);
+      }
+
+      args
+    }
+
     fn parse_assignment(&mut self) -> AST {
-      let line = self.current_token.clone().unwrap().line;
+      let line = self.current_token.as_ref().unwrap().line;
       self.expect(Some(vec!(TokenType::Keyword)), None);
 
       let var_name = self.current_token.clone().unwrap().value;
@@ -177,13 +211,13 @@ pub mod parser {
       let funk_name = self.current_token.clone().unwrap().value;
       self.expect(Some(vec!(TokenType::Identifier)), None);
 
-      let params: Vec<Box<AST>> = self.parse_funk_params();
+      let params: Vec<Box<AST>> = self.parse_params();
       let body: Vec<Box<AST>> = self.parse_body();
 
       AST::Funk(Funktion { name: funk_name, return_typ: expected_return, params: params, body: body })
     }
 
-    fn parse_funk_params(&mut self) -> Vec<Box<AST>> {
+    fn parse_params(&mut self) -> Vec<Box<AST>> {
       let mut params: Vec<Box<AST>> = vec!();
       self.expect(Some(vec!(TokenType::LPar)), None);
 
@@ -212,13 +246,11 @@ pub mod parser {
 
       while self.current_token != None && self.current_token.as_ref().unwrap().typ != TokenType::RCurl {
         self.skip_newlines();
-
         if self.current_token != None && self.current_token.as_ref().unwrap().typ == TokenType::RCurl {
           break;
         }
 
         body.push(Box::new(self.parse_top()));
-        self.next();
       }
       self.expect(Some(vec!(TokenType::RCurl)), None);
       body
