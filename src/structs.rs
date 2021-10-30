@@ -69,9 +69,22 @@ pub mod structs {
   #[derive(PartialEq, Debug)]
   pub struct Funktion {
     pub name: String,
-    pub return_typ: Token,
-    pub params: Vec<AST>,
-    pub body: Vec<AST>
+    pub return_typ: String,
+    pub params: Vec<Box<AST>>,
+    pub body: Vec<Box<AST>>
+  }
+
+  #[derive(PartialEq, Debug)]
+  pub struct Conditional {
+    pub typ: String,
+    pub expr: Option<Box<AST>>,
+    pub body: Vec<Box<AST>>,
+    pub other: Option<Box<AST>>
+  }
+
+  #[derive(PartialEq, Debug)]
+  pub struct Variable {
+    pub name: String
   }
 
   #[derive(PartialEq, Debug)]
@@ -83,6 +96,8 @@ pub mod structs {
     Str(Str),
     Assign(Assgignment),
     FunkParam(FunkParameter),
-    Funk(Funktion)
+    Funk(Funktion),
+    Cond(Conditional),
+    Var(Variable)
   }
 }

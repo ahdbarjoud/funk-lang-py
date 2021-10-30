@@ -1,4 +1,9 @@
+Integer a = 4;
 
-funk Integer test(String name, Integer age, Decimal salary) {
-  Integer fuck = 10;
+funk Integer test(String name, Decimal salary) {
+  if (salary == 5.0) {
+    Integer b = 1;
+  } else {
+    Integer b = 2;
+  }
 }
