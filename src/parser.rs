@@ -89,7 +89,7 @@ pub mod parser {
           self.parse_conditional()
         }
         else {
-          AST::Number(Integer { value: 0 })
+          AST::Integer{value: 0}
         }
       }
   }
@@ -102,7 +102,7 @@ pub mod parser {
       ["+".to_string(), "-".to_string(), "==".to_string()].contains(&self.current_token.as_ref().unwrap().value) {
         let op: &String = &self.current_token.as_ref().unwrap().value.clone();
         self.expect(Some(vec!(TokenType::Operator)), None);
-        result = AST::BiOpAst(op.to_string(), Box::new(result), Box::new(self.parse_expr()));
+        result = AST::BiOpAST{op: op.to_string(), left: Box::new(result), right: Box::new(self.parse_expr())};
       }
       result
     }
@@ -114,7 +114,7 @@ pub mod parser {
       ["*".to_string(), "/".to_string()].contains(&self.current_token.as_ref().unwrap().value) {
         let op = &self.current_token.as_ref().unwrap().value.clone();
         self.expect(Some(vec!(TokenType::Operator)), None);
-        result = AST::BiOpAst(op.to_string(), Box::new(result), Box::new(self.parse_term()));
+        result = AST::BiOpAST{op: op.to_string(), left: Box::new(result), right: Box::new(self.parse_term())};
       }
       result
     }
@@ -126,18 +126,18 @@ pub mod parser {
         if current.value.contains('.') {
           let val = current.value.parse::<f64>().unwrap(); // Decimal Numbers
           self.expect(Some(vec!(TokenType::Number)), None);
-          AST::Decminal(Decimal { value: val })
+          AST::Decminal{value: val}
         } else { // Integer Numbers
           let val = current.value.parse::<i64>().unwrap();
           self.expect(Some(vec!(TokenType::Number)), None);
-          AST::Number( Integer { value: val })
+          AST::Integer { value: val }
         }
       }
 
       else if current.typ == TokenType::String { // Handle Strings
         let val = self.current_token.clone().unwrap().value;
         self.expect(Some(vec!(TokenType::String)), None);
-        AST::Str(Str { value: val })
+        AST::Str { value: val }
       }
 
       else if current.typ == TokenType::LPar { // Handle Pars
@@ -157,7 +157,7 @@ pub mod parser {
         }
 
         else {
-          AST::Call(CallItem{ name: var.value, call_type: String::from("VariableCall"), args: None })
+          AST::CallItem{ name: var.value, call_type: String::from("VariableCall"), args: None, scope: String::from("Global") }
         }
         
       }
@@ -171,7 +171,7 @@ pub mod parser {
       self.expect(Some(vec!(TokenType::LPar)), None);
       let args = self.parse_args();
 
-      AST::Call(CallItem{ name: name.value, call_type: String::from("FunctionCall"), args: Some(args) })
+      AST::CallItem{ name: name.value, call_type: String::from("FunctionCall"), args: Some(args), scope: String::from("Global") }
     }
 
     fn parse_args(&mut self) -> Vec<Box<AST>> {
@@ -201,7 +201,7 @@ pub mod parser {
       let value: AST = self.parse_expr();
       self.expect(Some(vec!(TokenType::Semi, TokenType::Newline)), None);
 
-      AST::Assign(Assgignment { name: var_name, value: Box::new(value), scope: "Global".to_string(), line: line })
+      AST::Assgignment { name: var_name, value: Box::new(value), scope: "Global".to_string(), line: line }
     }
 
     fn parse_function(&mut self) -> AST {
@@ -214,7 +214,7 @@ pub mod parser {
       let params: Vec<Box<AST>> = self.parse_params();
       let body: Vec<Box<AST>> = self.parse_body();
 
-      AST::Funk(Funktion { name: funk_name, return_typ: expected_return, params: params, body: body })
+      AST::Funktion { name: funk_name, return_typ: expected_return, params: params, body: body }
     }
 
     fn parse_params(&mut self) -> Vec<Box<AST>> {
@@ -235,7 +235,7 @@ pub mod parser {
         let param_name = self.current_token.clone().unwrap().value;
         self.expect(Some(vec!(TokenType::Identifier)), None);
         self.expect(Some(vec!(TokenType::Comma, TokenType::RPar)), None);
-        params.push(Box::new(AST::FunkParam(FunkParameter { name: param_name, typ: param_typ })))
+        params.push(Box::new(AST::FunktionParameter { name: param_name, typ: param_typ }))
       }
       params
     }
@@ -261,7 +261,7 @@ pub mod parser {
       self.expect(None, Some(vec!(typ.clone().unwrap().value)));
 
       if typ.as_ref().unwrap().value == "else" {
-        return AST::Cond(Conditional{ typ: typ.clone().unwrap().value, body: self.parse_body(), expr: None, other: None });
+        return AST::Conditional{ typ: typ.clone().unwrap().value, body: self.parse_body(), expr: None, other: None };
       }
 
       let expr = Some(Box::new(self.parse_expr()));
@@ -269,11 +269,11 @@ pub mod parser {
       let mut other: Option<Box<AST>> = None;
 
       if self.current_token != None && self.current_token.as_ref().unwrap().typ == TokenType::Keyword &&
-      ["elif".to_string(), "else".to_string()].contains(&self.current_token.clone().unwrap().value) {
+      ["elseif".to_string(), "else".to_string()].contains(&self.current_token.clone().unwrap().value) {
         other = Some(Box::new(self.parse_conditional()));
       }
 
-      AST::Cond(Conditional{ typ: typ.clone().unwrap().value, body: body, expr: expr, other: other })
+      AST::Conditional{ typ: typ.clone().unwrap().value, body: body, expr: expr, other: other }
     }
   }
 }
