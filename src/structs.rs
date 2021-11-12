@@ -48,11 +48,12 @@ pub mod structs {
     Integer{value: i64},
     Decminal{value: f64},
     Str{value: String},
-    Assgignment{name: String, value: Box<AST>, scope: String, line: usize},
+    Assgignment{name: String, value: Box<AST>, var_type: String, scope: String, line: usize},
     FunktionParameter{name: String, typ: String},
     Funktion{name: String, return_typ: String, params: Vec<Box<AST>>, body: Vec<Box<AST>>},
     Conditional{typ: String, expr: Option<Box<AST>>, body: Vec<Box<AST>>, other: Option<Box<AST>>},
-    CallItem{name: String, call_type: String, args: Option<Vec<Box<AST>>>, scope: String}
+    CallItem{name: String, call_type: String, args: Option<Vec<Box<AST>>>, scope: String},
+    Variable{name: String, value: Box<AST>, var_type: String, scope: String, line: usize}
   }
 
   impl Add for AST {
@@ -123,6 +124,75 @@ pub mod structs {
         panic!("Sub AST panic.")
       }
     }
+  }
 
+  impl Mul for AST {
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+      if let AST::Integer{value} = self {
+        let val1 = value;
+
+        if let AST::Integer{value} = other {
+          let val2 = value;
+          Self::Integer{value: val1 * val2}
+        } else if let AST::Decminal{value} = other {
+          let val1 = val1 as f64;
+          let val2 = value;
+          Self::Decminal{value: val1 * val2}
+        } else {
+          panic!("Mul AST panic.");
+        }
+      } else if let AST::Decminal{value} = self {
+        let val1 = value;
+
+        if let AST::Integer{value} = other {
+          let val2 = value as f64;
+          Self::Decminal{value: val1 * val2}
+        } else if let AST::Decminal{value} = other {
+          let val2 = value;
+          Self::Decminal{value: val1 * val2}
+        } else {
+          panic!("Mul AST panic.")
+        }
+      } else {
+        panic!("Mul AST panic.");
+      }
+    }
+  }
+
+  impl Div for AST {
+    type Output = Self;
+
+    fn div(self, other: Self) -> Self {
+      if let AST::Integer{value} = self {
+        let val1 = value;
+
+        if let AST::Integer{value} = other {
+          let val2 = value;
+          Self::Integer{value: val1 / val2}
+        } else if let AST::Decminal{value} = other {
+          let val1 = val1 as f64;
+          let val2 = value;
+          Self::Decminal{value: val1 / val2}
+        } else {
+          panic!("Div AST panic.");
+        }
+      } else if let AST::Decminal{value} = self {
+        let val1 = value;
+
+        if let AST::Integer{value} = other {
+          let val2 = value as f64;
+          Self::Decminal{value: val1 / val2}
+        } else if let AST::Decminal{value} = other {
+          let val2 = value;
+          Self::Decminal{value: val1 / val2}
+        } else {
+          panic!("Div AST panic.")
+        }
+      } else {
+        panic!("Div AST panic.");
+      }
+    }
   }
 }

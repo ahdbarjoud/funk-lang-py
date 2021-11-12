@@ -1,12 +1,14 @@
 pub mod interpreter {
   pub use structs::structs::*;
+  use std::collections::hash_map::HashMap;
 
   pub struct Interpreter {
     pub pos: usize,
     pub last_pos: usize,
     pub current_ast: Option<AST>,
     pub next_ast: Option<AST>,
-    pub asts: Vec<AST>
+    pub asts: Vec<AST>,
+    pub variables: HashMap<String, AST>
   }
 
   
@@ -51,6 +53,12 @@ pub mod interpreter {
           return left + right;
         } else if op == String::from("-") {
           return left - right;
+        } else if op == String::from("*") {
+          return left * right;
+        } else if op == String::from("/") {
+          return left / right;
+        } else {
+          panic!("Unhandled AST.");
         }
 
       } else if let AST::Integer{value: _} = ast {
@@ -59,10 +67,39 @@ pub mod interpreter {
         return ast;
       } else if let AST::Str{value: _} = ast {
         return ast;
+      } 
+      
+      
+      else if let AST::Assgignment{ref name, ref value, ref var_type, ref scope, line} = ast {
+        let val = self.handle_ast(*value.clone());
+        let var = AST::Variable{name: name.clone(), value: Box::new(val), var_type: var_type.clone(), scope: scope.to_string(), line: line};
+        self.variables.insert(name.clone(), var.clone());
+        var
+      } else if let AST::CallItem{name, call_type, args: _, scope: _} = ast {
+        if call_type == "VariableCall" {
+          match self.variables.get(&name) {
+            Some(var) => {
+              match var {
+                AST::Variable{name: _, value, var_type: _, scope: _, line: _} => {
+                  return *value.clone();
+                },
+                _ => {
+                  panic!("");
+                }
+              }
+            },
+            None => {
+              panic!("");
+            }
+          }
+        } else {
+          panic!("");
+        }
       }
-
-      return AST::Integer{value: 0};
+      
+      else {
+        panic!("Unhandled AST.")
+      }
     }
   }
-
 }

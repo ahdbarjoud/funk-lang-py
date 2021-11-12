@@ -192,6 +192,7 @@ pub mod parser {
 
     fn parse_assignment(&mut self) -> AST {
       let line = self.current_token.as_ref().unwrap().line;
+      let var_type = self.current_token.clone().unwrap().value;
       self.expect(Some(vec!(TokenType::Keyword)), None);
 
       let var_name = self.current_token.clone().unwrap().value;
@@ -201,7 +202,7 @@ pub mod parser {
       let value: AST = self.parse_expr();
       self.expect(Some(vec!(TokenType::Semi, TokenType::Newline)), None);
 
-      AST::Assgignment { name: var_name, value: Box::new(value), scope: "Global".to_string(), line: line }
+      AST::Assgignment { name: var_name, value: Box::new(value), var_type: var_type, scope: "Global".to_string(), line: line }
     }
 
     fn parse_function(&mut self) -> AST {

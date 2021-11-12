@@ -9,6 +9,7 @@ pub use crate::lexer::lexer::Lexer;
 pub use crate::parser::parser::Parser;
 pub use crate::interpreter::interpreter::Interpreter;
 pub use crate::structs::structs::*;
+use std::collections::hash_map::HashMap;
 
 fn main() {
   let args: Vec<String> = env::args().collect();
@@ -25,7 +26,7 @@ fn main() {
   let mut parser = Parser{pos: 0, last_pos: tokens.len() - 1, current_token: None, next_token: None, tokens: tokens};
   let program: Vec<AST> = parser.parse();
 
-  let mut interpreter = Interpreter { pos: 0, next_ast: None, current_ast: None, last_pos: 0, asts: program };
+  let mut interpreter = Interpreter { pos: 0, next_ast: None, current_ast: None, last_pos: program.len()-1, asts: program, variables: HashMap::default()};
 
   interpreter.interpret();
 }
