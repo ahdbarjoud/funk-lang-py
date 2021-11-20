@@ -1,15 +1,10 @@
 use std::env;
 use std::fs;
 
-mod interpreter;
-mod lexer;
-mod parser;
 mod structs;
-pub use crate::interpreter::interpreter::Interpreter;
-pub use crate::lexer::lexer::Lexer;
-pub use crate::parser::parser::Parser;
+mod lexer;
+pub use crate::lexer::Lexer;
 pub use crate::structs::structs::*;
-use std::collections::hash_map::HashMap;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -20,31 +15,37 @@ fn main() {
     let code = fs::read_to_string(filename).expect("Could not read file");
 
     let mut lexer = Lexer {
-        code: String::new(),
+        code: code,
         last_pos: 0,
         pos: 0,
         line: 1,
         line_pos: 0,
+        current_char: None,
+        next_char: None
     };
-    let tokens: Vec<Token> = lexer.lex(code);
+    let tokens: Vec<Token> = lexer.lex();
 
-    let mut parser = Parser {
-        pos: 0,
-        last_pos: tokens.len() - 1,
-        current_token: None,
-        next_token: None,
-        tokens: tokens,
-    };
-    let program: Vec<AST> = parser.parse();
+    for i in tokens {
+        println!("{:?}", i);
+    }
 
-    let mut interpreter = Interpreter {
-        pos: 0,
-        next_ast: None,
-        current_ast: None,
-        last_pos: program.len() - 1,
-        asts: program,
-        variables: HashMap::default(),
-    };
+    // let mut parser = Parser {
+    //     pos: 0,
+    //     last_pos: tokens.len() - 1,
+    //     current_token: None,
+    //     next_token: None,
+    //     tokens: tokens,
+    // };
+    // let program: Vec<AST> = parser.parse();
 
-    interpreter.interpret();
+    // let mut interpreter = Interpreter {
+    //     pos: 0,
+    //     next_ast: None,
+    //     current_ast: None,
+    //     last_pos: program.len() - 1,
+    //     asts: program,
+    //     variables: HashMap::default(),
+    // };
+
+    // interpreter.interpret();
 }
