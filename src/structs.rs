@@ -1,5 +1,5 @@
 pub mod structs {
-    // use std::ops::*;
+    use std::ops::Range;
 
     pub const OPEARTORS: [&'static str; 28] = [
         "+", "-", "*", "/", "%", "^", ">", "<", ">=", "<=", "==", "!=", "!", "&", ":", "?", "|",
@@ -14,7 +14,7 @@ pub mod structs {
     pub struct Token {
         pub ty: TokenType,
         pub line: usize,
-        pub line_pos: usize
+        pub range: Range<usize>
     }
 
     // NOTE: Remove
@@ -39,10 +39,7 @@ pub mod structs {
         Comma,
         // ;
         Semi,
-        Integer(i64),
-        Decimal(f64),
-        String(String),
-        Boolean(bool),
+        Literal(Val),
         Keyword(Keyword),
         Identifier(String),
         // / Single Line - # Multi Line #
@@ -104,8 +101,27 @@ pub mod structs {
     }
     #[derive(Debug, Clone, PartialEq)]
     pub enum Keyword {
-
+        Integer,
+        Decimal,
+        Boolean,
+        If,
+        Else,
+        Elseif,
+        Return,
+        While,
+        For,
+        Break,
+        Funk,
+        Unknown
     }
+
+    #[derive(Debug, Clone, PartialEq)]
+    pub enum Val {
+        Number,
+        String
+    }
+
+
 
 
 
