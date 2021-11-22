@@ -41,7 +41,7 @@ pub mod structs {
         Semi,
         Literal(Val),
         Keyword(Keyword),
-        Identifier(String),
+        Identifier,
         // / Single Line - # Multi Line #
         Comment,
         // ++
@@ -94,7 +94,19 @@ pub mod structs {
                 c if c == "-".to_string() => TokenType::Minus,
                 c if c == "/".to_string() => TokenType::Divide,
                 c if c == "*".to_string() => TokenType::Multiply,
-
+                c if c == "%".to_string() => TokenType::Percent,
+                c if c == "==".to_string() => TokenType::Equals,
+                c if c == "=".to_string() => TokenType::Assign,
+                c if c == "<".to_string() => TokenType::LessThan,
+                c if c == ">".to_string() => TokenType::GreaterThan,
+                c if c == ">=".to_string() => TokenType::GreaterOrEqual,
+                c if c == "<=".to_string() => TokenType::LessThanOrEqual,
+                c if c == "!=".to_string() => TokenType::NotEqual,
+                c if c == "&&".to_string() => TokenType::And,
+                c if c == "||".to_string() => TokenType::Or,
+                c if c == "+=".to_string() => TokenType::PlusEqual,
+                c if c == "-=".to_string() => TokenType::MinusEqual,
+                c if c == "*".to_string() => TokenType::Dot,
                 _ => TokenType::Unknown
             }
         }
@@ -113,6 +125,25 @@ pub mod structs {
         Break,
         Funk,
         Unknown
+    }
+
+    impl Keyword {
+        pub fn new(raw: String) -> Keyword {
+            match raw {
+                c if c == "integer" => Keyword::Integer,
+                c if c == "decimal" => Keyword::Decimal,
+                c if c == "noolean" => Keyword::Boolean,
+                c if c == "if" => Keyword::If,
+                c if c == "else" => Keyword::Else,
+                c if c == "elseif" => Keyword::Elseif,
+                c if c == "return" => Keyword::Return,
+                c if c == "while" => Keyword::While,
+                c if c == "for" => Keyword::For,
+                c if c == "break" => Keyword::Break,
+                c if c == "funk" => Keyword::Funk,
+                _  => Keyword::Unknown,
+            }
+        }
     }
 
     #[derive(Debug, Clone, PartialEq)]

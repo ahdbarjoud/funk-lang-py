@@ -52,16 +52,33 @@ impl Lexer {
                 Token{ ty: TokenType::Whitespace, line: self.line, range: Range{ start: self.pos, end: self.pos} }
               }
             },
-            c if c.is_numeric() => self.lex_numbers(iter, *c),
+            num if num.is_numeric() => self.lex_numbers(iter, *num),
             op if OPEARTORS.contains(&&*op.to_string()) => self.lex_operators(iter, *op),
             string if string == &'\"' => self.lex_string(iter),
-
+            keyword if keyword.is_alphabetic() || keyword == &'_' => self.lex_keywords(iter, *keyword),
             _ => Token{ ty: TokenType::Unknown, line: self.line, range: Range{ start: self.pos, end: self.pos} },
           }
         }
       })
     }
     tokens
+  }
+
+  fn lex_keywords(&mut self, iter: &mut Peekable<Iter<char>>, first: char) -> Token {
+    let mut keyword = String::from(first);
+    let start_pos = self.pos;
+    let start_line = self.line;
+
+    while iter.peek() != None && (iter.peek().unwrap().is_alphanumeric() || iter.peek().unwrap() == &&'_') {
+      keyword.push(*iter.next().unwrap());
+      self.pos += 1;
+    }
+
+    if KEYWORDS.contains(&&*keyword.to_string()) {
+      Token{ ty: TokenType::Keyword(Keyword::new(keyword)), line: start_line, range: Range{ start: start_pos, end: self.pos} }
+    } else {
+      Token{ ty: TokenType::Identifier, line: start_line, range: Range{ start: start_pos, end: self.pos} }
+    }
   }
 
   fn lex_string(&mut self, iter: &mut Peekable<Iter<char>>) -> Token {
@@ -104,7 +121,6 @@ impl Lexer {
     if iter.peek() == None && end == false {
       panic!("")
     }
-
     Token{ ty: TokenType::Literal(Val::String), line: start_line, range: Range{ start: start_pos, end: self.pos} }
   }
 
