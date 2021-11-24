@@ -35,16 +35,11 @@ impl Lexer {
         None => {break},
         Some(cur) => {
           match cur {
-            '(' => Token{ ty: TokenType::LPar, line: self.line, range: Range{ start: self.pos, end: self.pos} },
-            ')' => Token{ ty: TokenType::RPar, line: self.line, range: Range{ start: self.pos, end: self.pos} },
-            '{' => Token{ ty: TokenType::LCurl, line: self.line, range: Range{ start: self.pos, end: self.pos} },
-            '}' => Token{ ty: TokenType::RCurl, line: self.line, range: Range{ start: self.pos, end: self.pos} },
-            '[' => Token{ ty: TokenType::LBrac, line: self.line, range: Range{ start: self.pos, end: self.pos} },
-            ']' => Token{ ty: TokenType::RBrac, line: self.line, range: Range{ start: self.pos, end: self.pos} },
-            ',' => Token{ ty: TokenType::Comma, line: self.line, range: Range{ start: self.pos, end: self.pos} },
-            ';' => Token{ ty: TokenType::Semi, line: self.line, range: Range{ start: self.pos, end: self.pos} },
-            c if c.is_whitespace() => {
-              if *c == '\n' {
+            c if ['(', ')', '}', '{', '[', ']', ',', ';'].contains(c) => { 
+              Token{ ty: TokenType::new(c.to_string()), line: self.line, range: Range{ start: self.pos, end: self.pos} }
+            },
+            space if space.is_whitespace() => {
+              if *space == '\n' {
                 self.line += 1;
                 self.line_pos = 0;
                 Token{ ty: TokenType::Newline, line: self.line, range: Range{ start: self.pos, end: self.pos} }

@@ -87,6 +87,7 @@ pub mod structs {
         // Unexpected
         Unknown
     }
+
     impl TokenType {
         pub fn new(raw: String) -> TokenType {
             match raw {
@@ -106,11 +107,19 @@ pub mod structs {
                 c if c == "||".to_string() => TokenType::Or,
                 c if c == "+=".to_string() => TokenType::PlusEqual,
                 c if c == "-=".to_string() => TokenType::MinusEqual,
-                c if c == "*".to_string() => TokenType::Dot,
+                c if c == "(".to_string() => TokenType::LPar,
+                c if c == ")".to_string() => TokenType::RPar,
+                c if c == "[".to_string() => TokenType::LBrac,
+                c if c == "]".to_string() => TokenType::RBrac,
+                c if c == "{".to_string() => TokenType::LCurl,
+                c if c == "}".to_string() => TokenType::RCurl,
+                c if c == ",".to_string() => TokenType::Comma,
+                c if c == ";".to_string() => TokenType::Semi,
                 _ => TokenType::Unknown
             }
         }
     }
+
     #[derive(Debug, Clone, PartialEq)]
     pub enum Keyword {
         Integer,
@@ -130,9 +139,9 @@ pub mod structs {
     impl Keyword {
         pub fn new(raw: String) -> Keyword {
             match raw {
-                c if c == "integer" => Keyword::Integer,
-                c if c == "decimal" => Keyword::Decimal,
-                c if c == "noolean" => Keyword::Boolean,
+                c if c == "Integer" => Keyword::Integer,
+                c if c == "Decimal" => Keyword::Decimal,
+                c if c == "Boolean" => Keyword::Boolean,
                 c if c == "if" => Keyword::If,
                 c if c == "else" => Keyword::Else,
                 c if c == "elseif" => Keyword::Elseif,
@@ -151,7 +160,6 @@ pub mod structs {
         Number,
         String
     }
-
 
 
 
