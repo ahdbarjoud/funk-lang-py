@@ -3,7 +3,9 @@ use std::fs;
 
 mod structs;
 mod lexer;
+mod parser;
 pub use crate::lexer::Lexer;
+pub use crate::parser::Parser;
 pub use crate::structs::structs::*;
 
 fn main() {
@@ -15,19 +17,50 @@ fn main() {
     let code = fs::read_to_string(filename).expect("Could not read file");
 
     let mut lexer = Lexer {
-        code: code,
+        code: code.clone(),
         last_pos: 0,
         pos: 0,
-        line: 1,
+        line: 0,
         line_pos: 0,
         current_char: None,
         next_char: None
     };
     let tokens: Vec<Token> = lexer.lex();
 
-    for i in tokens {
+    for i in &tokens {
         println!("{:?}", i);
     }
+
+    let mut parser = Parser {
+        pos: 0,
+        last_pos: tokens.len() - 1,
+        current_token: None,
+        next_token: None,
+        tokens: tokens,
+        source: code
+    };
+    let program: Vec<AST> = parser.parse();
+
+    for i in &program {
+        println!("{:?}", i);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // let mut parser = Parser {
     //     pos: 0,

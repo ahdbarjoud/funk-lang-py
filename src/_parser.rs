@@ -1,4 +1,4 @@
-pub mod parser {
+pub mod _parser {
     pub use structs::structs::*;
 
     #[derive(Debug)]
