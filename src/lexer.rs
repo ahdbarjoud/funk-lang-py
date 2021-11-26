@@ -25,36 +25,39 @@ impl Lexer {
 
   fn parse_tokens(&mut self, iter: &mut Peekable<Iter<char>>) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
-    
-    while self.pos <= self.last_pos {
-      self.pos += 1;
-      self.line_pos += 1;
-      let current = iter.next();
+    let mut current = iter.next();
 
+    while self.pos <= self.last_pos {
       tokens.push(match current {
         None => {break},
         Some(cur) => {
           match cur {
             c if ['(', ')', '}', '{', '[', ']', ',', ';'].contains(c) => { 
-              Token{ ty: TokenType::new(c.to_string()), line: self.line, range: Range{ start: self.pos, end: self.pos} }
+              Token{ ty: TokenType::new(c.to_string()), line: self.line, range: Range{ start: self.pos, end: self.pos + 1} }
             },
             space if space.is_whitespace() => {
               if *space == '\n' {
                 self.line += 1;
                 self.line_pos = 0;
-                Token{ ty: TokenType::Newline, line: self.line, range: Range{ start: self.pos, end: self.pos} }
+                Token{ ty: TokenType::Newline, line: self.line, range: Range{ start: self.pos, end: self.pos + 1} }
               } else {
-                Token{ ty: TokenType::Whitespace, line: self.line, range: Range{ start: self.pos, end: self.pos} }
+                current = iter.next();
+                self.pos += 1;
+                self.line_pos += 1;
+                continue;
               }
             },
             num if num.is_numeric() => self.lex_numbers(iter, *num),
             op if OPEARTORS.contains(&&*op.to_string()) => self.lex_operators(iter, *op),
             string if string == &'\"' => self.lex_string(iter),
             keyword if keyword.is_alphabetic() || keyword == &'_' => self.lex_keywords(iter, *keyword),
-            _ => Token{ ty: TokenType::Unknown, line: self.line, range: Range{ start: self.pos, end: self.pos} },
+            _ => Token{ ty: TokenType::Unknown, line: self.line, range: Range{ start: self.pos, end: self.pos + 1} },
           }
         }
-      })
+      });
+      current = iter.next();
+      self.pos += 1;
+      self.line_pos += 1;
     }
     tokens
   }
@@ -70,9 +73,9 @@ impl Lexer {
     }
 
     if KEYWORDS.contains(&&*keyword.to_string()) {
-      Token{ ty: TokenType::Keyword(Keyword::new(keyword)), line: start_line, range: Range{ start: start_pos, end: self.pos} }
+      Token{ ty: TokenType::Keyword(Keyword::new(keyword)), line: start_line, range: Range{ start: start_pos, end: self.pos + 1} }
     } else {
-      Token{ ty: TokenType::Identifier, line: start_line, range: Range{ start: start_pos, end: self.pos} }
+      Token{ ty: TokenType::Identifier, line: start_line, range: Range{ start: start_pos, end: self.pos + 1} }
     }
   }
 
@@ -116,7 +119,7 @@ impl Lexer {
     if iter.peek() == None && end == false {
       panic!("")
     }
-    Token{ ty: TokenType::Literal(Val::String), line: start_line, range: Range{ start: start_pos, end: self.pos} }
+    Token{ ty: TokenType::Literal(Val::String), line: start_line, range: Range{ start: start_pos, end: self.pos + 1} }
   }
 
   fn lex_operators(&mut self, iter: &mut Peekable<Iter<char>>, first: char) -> Token {
@@ -132,7 +135,7 @@ impl Lexer {
     if ! OPEARTORS.contains(&&*op.to_string()) {
       panic!("")
     } else {
-      Token{ ty: TokenType::new(op), line: self.line, range: Range{ start: start_pos, end: self.pos} }
+      Token{ ty: TokenType::new(op), line: self.line, range: Range{ start: start_pos, end: self.pos + 1} }
     }
   }
 
@@ -150,6 +153,6 @@ impl Lexer {
       panic!("")
     }
 
-    Token{ ty: TokenType::Literal(Val::Number), line: self.line, range: Range{ start: start_pos, end: self.pos} }
+    Token{ ty: TokenType::Literal(Val::Number), line: self.line, range: Range{ start: start_pos, end: self.pos + 1} }
   }
 }

@@ -17,12 +17,10 @@ pub mod structs {
         pub range: Range<usize>
     }
 
-    // NOTE: Remove
     #[derive(Debug, Clone, PartialEq)]
     pub enum TokenType {
         // \n
         Newline,
-        Whitespace,
         // (
         LPar,
         // )
@@ -53,19 +51,19 @@ pub mod structs {
         // -
         Minus,
         // *
-        Multiply,
+        Star,
         // /
-        Divide,
+        Slash,
         // **
-        Exponent,
+        StarStar,
         // %
         Percent,
         // .
         Dot,
         // =
-        Assign,
-        // ==
         Equals,
+        // ==
+        EqualsEquals,
         // <
         LessThan,
         // >
@@ -84,6 +82,8 @@ pub mod structs {
         PlusEqual,
         // -=
         MinusEqual,
+        // !
+        Not,
         // Unexpected
         Unknown
     }
@@ -93,15 +93,17 @@ pub mod structs {
             match raw {
                 c if c == "+".to_string() => TokenType::Plus,
                 c if c == "-".to_string() => TokenType::Minus,
-                c if c == "/".to_string() => TokenType::Divide,
-                c if c == "*".to_string() => TokenType::Multiply,
+                c if c == "/".to_string() => TokenType::Slash,
+                c if c == "*".to_string() => TokenType::Star,
+                c if c == "**".to_string() => TokenType::StarStar,
                 c if c == "%".to_string() => TokenType::Percent,
-                c if c == "==".to_string() => TokenType::Equals,
-                c if c == "=".to_string() => TokenType::Assign,
+                c if c == "==".to_string() => TokenType::EqualsEquals,
+                c if c == "=".to_string() => TokenType::Equals,
                 c if c == "<".to_string() => TokenType::LessThan,
                 c if c == ">".to_string() => TokenType::GreaterThan,
                 c if c == ">=".to_string() => TokenType::GreaterOrEqual,
                 c if c == "<=".to_string() => TokenType::LessThanOrEqual,
+                c if c == "!".to_string() => TokenType::Not,
                 c if c == "!=".to_string() => TokenType::NotEqual,
                 c if c == "&&".to_string() => TokenType::And,
                 c if c == "||".to_string() => TokenType::Or,
@@ -161,7 +163,48 @@ pub mod structs {
         String
     }
 
+    #[derive(Debug, Clone, PartialEq)]
+    pub enum AST {
+        Expression(Expr)
+    }
 
+    #[derive(Debug, Clone, PartialEq)]
+    pub enum Expr {
+        Integer(i64),
+        Decimal(f64),
+        String(String),
+        Boolean(bool),
+        Binary(BinaryExpr)
+    }
+
+    #[derive(Debug, Clone, PartialEq)]
+    pub enum BinOp {
+        Add,
+        Subtract,
+        Multiply,
+        Divide,
+        Exponent,
+        Unknown
+    }
+    impl BinOp {
+        pub fn new(tkty: &TokenType) -> BinOp {
+            match  tkty {
+                TokenType::Plus => BinOp::Add,
+                TokenType::Minus => BinOp::Subtract,
+                TokenType::Star => BinOp::Multiply,
+                TokenType::Slash => BinOp::Divide,
+                TokenType::StarStar => BinOp::Exponent,
+                _ => BinOp::Unknown
+            }
+        }
+    }
+
+    #[derive(Debug, Clone, PartialEq)]
+    pub struct BinaryExpr {
+        pub left: Box<AST>,
+        pub op: BinOp,
+        pub right: Box<AST>
+    }
 
 
 
