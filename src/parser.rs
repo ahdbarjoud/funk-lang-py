@@ -1,4 +1,3 @@
-// use std::ops::Range;
 use structs::structs::*;
 
 pub struct Parser {

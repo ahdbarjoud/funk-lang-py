@@ -1,5 +1,5 @@
 pub mod structs {
-    use std::ops::Range;
+    use std::ops::{Add, Range};
 
     pub const OPEARTORS: [&'static str; 28] = [
         "+", "-", "*", "/", "%", "^", ">", "<", ">=", "<=", "==", "!=", "!", "&", ":", "?", "|",
@@ -206,10 +206,43 @@ pub mod structs {
         pub right: Box<AST>
     }
 
+    #[derive(Debug, Clone, PartialEq)]
+    pub enum Object {
+        Integer(Integer),
+        Decimal(Decimal)
+    }
 
+    #[derive(Debug, Clone, PartialEq)]
+    pub struct Integer {
+        pub value: i64
+    }
 
+    #[derive(Debug, Clone, PartialEq)]
+    pub struct Decimal {
+        pub value: f64
+    }
 
+    impl Add for Object {
+        type Output = Object;
 
+        fn add(self, other: Self) -> Self::Output {
+            match self {
+                Object::Integer(int1) => {
+                    match other {
+                        Object::Integer(int2) => {
+                            Object::Integer(Integer{ value: int1.value + int2.value })
+                        },
+                        _ => {
+                            panic!("");
+                        }
+                    }
+                },
+                _ => {
+                    panic!("");
+                }
+            }
+        }
+    }
 
 
 

@@ -4,6 +4,9 @@ use std::fs;
 mod structs;
 mod lexer;
 mod parser;
+mod interpreter;
+use interpreter::Interpreter;
+
 pub use crate::lexer::Lexer;
 pub use crate::parser::Parser;
 pub use crate::structs::structs::*;
@@ -27,10 +30,6 @@ fn main() {
     };
     let tokens: Vec<Token> = lexer.lex();
 
-    for i in &tokens {
-        println!("{:?}", i);
-    }
-
     let mut parser = Parser {
         pos: 0,
         last_pos: tokens.len() - 1,
@@ -41,11 +40,8 @@ fn main() {
     };
     let program: Vec<AST> = parser.parse();
 
-    for i in &program {
-        println!("{:?}", i);
-    }
-
-
+    let mut interpreter = Interpreter { pos: 0, last_pos: program.len() - 1, asts: program, current_ast: None };
+    interpreter.interpret();
 
 
 
