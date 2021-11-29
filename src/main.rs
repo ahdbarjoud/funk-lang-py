@@ -40,7 +40,8 @@ fn main() {
     };
     let program: Vec<AST> = parser.parse();
 
-    let mut interpreter = Interpreter { pos: 0, last_pos: program.len() - 1, asts: program, current_ast: None };
+    let mut interpreter = Interpreter { pos: 0, last_pos: program.len() - 1, asts: program, current_ast: None,
+        env: Env::new() };
     interpreter.interpret();
 
 

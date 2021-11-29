@@ -1,5 +1,6 @@
 pub mod structs {
     use std::ops::{Add, Range};
+    use std::collections::HashMap;
 
     pub const OPEARTORS: [&'static str; 28] = [
         "+", "-", "*", "/", "%", "^", ">", "<", ">=", "<=", "==", "!=", "!", "&", ":", "?", "|",
@@ -244,8 +245,31 @@ pub mod structs {
         }
     }
 
+    #[derive(Debug, Clone, PartialEq)]
+    pub struct Env {
+        scope: HashMap<String, Object>,
+        envs: HashMap<String, Env>
+    }
 
+    impl Env {
+        pub fn new() -> Env {
+            Env{ scope: HashMap::new(), envs: HashMap::new() }
+        }
 
+        pub fn get_scope(&mut self, name: String) -> Object {
+            self.scope.get(&name).unwrap().clone()
+        }
+        pub fn set_scope(&mut self, name: String, val: Object) -> Option<Object> {
+            self.scope.insert(name, val)
+        }
+
+        pub fn get_env(&self, name: String) -> Env {
+            self.envs.get(&name).unwrap().clone()
+        }
+        pub fn set_env(&mut self, name: String, val: Object) -> Option<Object> {
+            self.scope.insert(name, val)
+        }
+    }
 
 
 

@@ -4,7 +4,8 @@ pub struct Interpreter {
   pub asts: Vec<AST>,
   pub current_ast: Option<AST>,
   pub pos: usize,
-  pub last_pos: usize
+  pub last_pos: usize,
+  pub env: Env
 }
 
 impl Interpreter {
