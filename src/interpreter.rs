@@ -33,7 +33,6 @@ impl Interpreter {
 
       if binop.op == BinOp::Add {
         let a = left + right;
-        println!("{:?}", a);
         a
       } else {
         panic!("")
@@ -41,8 +40,14 @@ impl Interpreter {
     }
     else if let AST::Expression(Expr::Integer(val)) = ast {
       Object::Integer(Integer{ value: val })
-    } 
-    
+    }
+
+    else if let AST::Statement(Statement::Assignment(var)) = ast {
+      let variable = Object::Variable(Variable{ name: var.name.clone(), value: Box::new(self.handle_ast(*var.value)), ty: var.ty });
+      self.env.vars.insert(var.name, variable.clone());
+      variable
+    }
+
     else {
       panic!("")
     }

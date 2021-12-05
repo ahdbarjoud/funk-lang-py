@@ -5,11 +5,11 @@ mod structs;
 mod lexer;
 mod parser;
 mod interpreter;
-use interpreter::Interpreter;
 
-pub use crate::lexer::Lexer;
-pub use crate::parser::Parser;
-pub use crate::structs::structs::*;
+use interpreter::Interpreter;
+use lexer::Lexer;
+use parser::Parser;
+use structs::structs::*;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

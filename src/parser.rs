@@ -60,13 +60,79 @@ impl Parser {
   }
 
   fn parse_top(&mut self) -> AST {
-    let current = self.current_token.clone().unwrap().clone();
+    let current = self.current_token.clone().unwrap();
 
-    if let TokenType::Keyword(_) = &current.ty {
-      panic!("Keywords not handled yet")
+    if let TokenType::Keyword(kw) = &current.ty {
+      if kw == &Keyword::Integer || kw == &Keyword::Decimal || kw == &Keyword::Boolean {
+        self.parse_assignment(kw.clone())
+      } else if kw == &Keyword::Funk {
+        self.parse_function()
+      }
+
+      else {
+        panic!("Keywords not handled yet")
+      }
     } else {
       self.parse_expr()
     }
+  }
+
+  fn parse_function(&mut self) -> AST {
+    self.expect(vec!(self.current_token.clone().unwrap().ty));
+
+    let func_name = self.source[self.current_token.clone().unwrap().range].to_string();
+    self.expect(vec!(TokenType::Identifier));
+    let func_params = self.parse_params();
+
+    // placeholder
+    AST::Expression(Expr::Integer(5))
+  }
+
+  fn parse_params(&mut self) -> Vec<AST> {
+    self.expect(vec!(TokenType::LPar));
+    let mut params = vec!();
+
+    while self.current_token != None {
+      let curr = self.current_token.clone().unwrap();
+      if curr.ty == TokenType::RPar {
+        self.expect(vec!(TokenType::RPar));
+        break;
+      }
+
+      if curr.ty == TokenType::Comma {
+        if self.next_token != None && ! matches!(self.next_token.clone().unwrap().ty, TokenType::Keyword(_)) {
+          panic!("")
+        }
+        self.expect(vec!(TokenType::Comma));
+      }
+
+      if let TokenType::Keyword(kw) = curr.ty {
+        let arg_type = kw;
+        self.expect(vec!(self.current_token.clone().unwrap().ty));
+
+        let arg_name = self.source[curr.range].to_string();
+        self.expect(vec!(TokenType::Identifier));
+
+        params.push(AST::Expression(Expr::Argument{name: arg_name, ty: arg_type}));
+      }
+    }
+    params
+  }
+
+  fn parse_assignment(&mut self, kw: Keyword) -> AST {
+    let var_type = match kw {
+      Keyword::Integer => Type::Integer,
+      Keyword::Decimal => Type::Decimal,
+      _ => panic!("")
+    };
+    self.expect(vec!(self.current_token.clone().unwrap().ty));
+    
+    let var_name = self.source[self.current_token.clone().unwrap().range].to_string();
+    self.expect(vec!(self.current_token.clone().unwrap().ty));
+    self.expect(vec!(self.current_token.clone().unwrap().ty));
+
+    let var_val = self.parse_top();
+    AST::Statement(Statement::Assignment(Assign{name: var_name, ty: var_type, value: Box::new(var_val)}))
   }
 
   fn parse_expr(&mut self) -> AST {
