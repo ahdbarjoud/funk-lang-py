@@ -1,21 +1,17 @@
+import sys
 from Funk.lexer import Lexer
-from Funk.parser import Parser
-from Funk.interpreter import Interpreter
-path = './test.fk'
 
-code = open(path).read()
+if len(sys.argv) < 2:
+  # TODO: Open REPL
+  print("Open REPL")
+else:
+  # TODO: Read the file mentioned
+  code_file_path = sys.argv[1]
+  
+  with open(code_file_path, 'r') as f:
+    source_code = f.read()
 
-pos = 0
-
-lex = Lexer(code)
-lex.parse()
-# for i in lex.tokens:
-#   print(i)
-#   print()
-parser = Parser(lex.tokens)
-parser.parse()
-inter = Interpreter(parser.program)
-inter.eval()
-
-# for i in lex.tokens:
-  # print(i)
+  lexer = Lexer(source_code)
+  lexer.lex()
+  
+  print(lexer.tokens)

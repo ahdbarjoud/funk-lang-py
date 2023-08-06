@@ -1,10 +1,21 @@
 ### Funk Variables
-The type of each variable must be know at compile time.
 ```
-// A semi is not important.
-String wee = "Wooo";
+String wee = "Wooo"
 
 Integer waa = 50
+```
+
+### Operations
+```
+1 + 2
+
+2 - 1
+
+3 * 3
+
+4 / 2
+
+4 ** 2
 ```
 
 ### Funk conditionals

@@ -1,154 +1,56 @@
-from .utils.classes import *
+from .utils.tokens import *
 
 class Lexer:
-  def __init__(self, code):
-    self.code = code
+  def __init__(self, source_code):
+    self.source_code = source_code
+    self.current_char: str = None
     self.pos = 0
-    self.line = 0
-    self.current_char = self.code[self.pos]
-    self.next_char = '\0'
-    self.code_length = len(code) - 1
+    self.line = 1
+    self.line_pos = 1
     self.tokens = []
 
-  def next(self):
-    # We increment.
-    self.pos += 1
-    if self.pos > self.code_length: # We no go too far.
-      self.current_char = '\0'
-      self.next_char = '\0'
+  def next_char(self):
+    if not self.source_code:
+      self.current_char = None
       return
+    self.current_char, self.source_code = self.source_code[0], self.source_code[1:]
+    self.pos += 1
+    self.line_pos += 1
 
-    self.current_char = self.code[self.pos] # We set current char.
-
-    if self.pos+1 > self.code_length:
-      self.next_char = '\0'
-    else:
-      self.next_char = self.code[self.pos + 1] # We set next char.
-
-  def parse(self):
-    while self.current_char != "\0":
-      if self.current_char.isspace():
-        if self.current_char == "\n":
+  def lex(self):
+    self.next_char()
+    while self.current_char:
+      match self.current_char:
+        case c if c.isspace():
+          self.tokens.append(Token(TokenType.WHITESPACE, LocationInfo(self.pos, self.pos+1, self.line, self.line_pos)))
+          self.next_char()
+        case c if c == "\n":
+          self.tokens.append(Token(TokenType.NEWLINE, LocationInfo(self.pos, self.pos+1, self.line, self.line_pos)))
+          self.line_pos = 0
           self.line += 1
-          self.tokens.append(Token(TokenType.Newline, self.current_char, self.pos, self.line))
-        self.next()
+          self.next_char()
+        case c if c.isnumeric():
+          self.tokens.append(self.handle_numbers())
+        case c if c == "\"":
+          self.tokens.append(self.handle_strings())
+        case _:
+          # TODO: Make an Exception called UnknownCharacter and raise it
+          self.next_char()
 
-      elif self.current_char == "(":
-        self.tokens.append(Token(TokenType.LPar, "(", self.pos, self.line))
-        self.next()
-
-      elif self.current_char == ")":
-        self.tokens.append(Token(TokenType.RPar, ")", self.pos, self.line))
-        self.next()
-
-      elif self.current_char == "{":
-        self.tokens.append(Token(TokenType.LCurl, "{", self.pos, self.line))
-        self.next()
-
-      elif self.current_char == "}":
-        self.tokens.append(Token(TokenType.RCurl, "}", self.pos, self.line))
-        self.next()
-      
-      elif self.current_char == "[":
-        self.tokens.append(Token(TokenType.LBrac, "[", self.pos, self.line))
-        self.next()
-
-      elif self.current_char == "]":
-        self.tokens.append(Token(TokenType.RBrac, "]", self.pos, self.line))
-        self.next()
-
-      elif self.current_char == ";":
-        self.tokens.append(Token(TokenType.Semi, ";", self.pos, self.line))
-        self.next()
-
-      elif self.current_char == ",":
-        self.tokens.append(Token(TokenType.Comma, ",", self.pos, self.line))
-        self.next()
-
-      elif self.current_char in ('"', "'"):
-        self.parse_string(self.current_char)
-
-      elif self.current_char.isalpha() or self.current_char == "_":
-        self.parse_identifier()
-
-      elif self.current_char in OPS:
-        self.parse_operators()
-
-      elif self.current_char != '\0' and self.current_char.isdigit():
-        self.parse_number()
-
-      else:
-        raise Exception(
-          'Invalid character on {0}:{1}\n  {2}\n  {3}'.format(
-          self.line, self.line, str(self.code).split('\n')[self.line - 1], f"{' ' * (self.line - 1)}^")
-        )
-
-  def parse_string(self, char):
-    string = ''
+  def handle_numbers(self) -> Token:
     start_pos = self.pos
-    end = False
-    self.next()
+    while self.current_char and self.current_char.isnumeric() or self.current_char == ".":
+      self.next_char()
+    end_pos = self.pos + 1
+    return Token(TokenType.NUMBER, LocationInfo(start_pos, end_pos, self.line, self.line_pos))
 
-    while self.current_char != "\0":
-      if self.current_char == char:
-        self.tokens.append(Token(TokenType.String, string, start_pos, self.line))
-        self.next()
-        end = True
-        break
-
-      if self.current_char == "\\":
-        self.next()
-        if self.current_char == "n":
-          string += "\n"
-        else: 
-          string += self.next_char
-        self.next()
-        continue
-
-      else:
-        string += self.current_char
-
-      self.next()
-
-    if self.current_char == '\0' and not end:
-      raise Exception('A string was not properly enclosed at {0}:{1}\n  {2}\n  {3}'.format(
-        self.line, start_pos, str(self.code).split('\n')[self.line - 1], f"{' ' * (start_pos - 1)}^")
-      )
-
-  def parse_identifier(self):
+  def handle_strings(self) -> Token:
     start_pos = self.pos
-    name = ""
-
-    while self.current_char != "\0" and (self.current_char.isalpha() or self.current_char == "_"):
-      name += self.current_char
-      self.next()
-
-    if name in KEYWORDS:
-      self.tokens.append(Token(TokenType.Keyword, name, start_pos, self.line))
-    else:
-      self.tokens.append(Token(TokenType.Variable, name, start_pos, self.line))
-
-  def parse_operators(self):
-    start_pos = self.pos
-    operator = ""
-
-    while self.current_char != "\0" and self.current_char in OPS:
-      operator += self.current_char
-      self.next()
-
-    if not operator in OPS:
-      raise Exception('Invalid operator on {0}:{1}\n  {2}\n  {3}'.format(
-        self.line, start_pos, str(self.code).split('\n')[self.line - 1], f"{' ' * (start_pos - 1)}^")
-      )
-
-    self.tokens.append(Token(TokenType.Operator, operator, start_pos, self.line))
-
-  def parse_number(self):
-    start_pos = self.pos
-    num = ""
-
-    while self.current_char != '\0' and not self.current_char.isspace() and self.current_char.isdigit():
-      num += self.current_char
-      self.next()
-
-    self.tokens.append(Token(TokenType.Num, int(num), start_pos, self.line))
+    self.next_char()
+    while self.current_char and self.current_char != "\"":
+      self.next_char()
+    if self.current_char != "\"":
+      raise Exception("String was never closed.")
+    end_pos = self.pos + 1
+    self.next_char()
+    return Token(TokenType.STRING, LocationInfo(start_pos, end_pos, self.line, self.line_pos))
