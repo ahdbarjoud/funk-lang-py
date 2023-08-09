@@ -1,4 +1,4 @@
-from .utils.tokens import *
+from utils.tokens import *
 
 class Lexer:
   def __init__(self, source_code):
