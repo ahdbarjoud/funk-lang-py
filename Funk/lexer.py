@@ -1,4 +1,4 @@
-from utils.tokens import *
+from .utils.tokens import *
 
 class Lexer:
   def __init__(self, source_code):
@@ -22,6 +22,12 @@ class Lexer:
     while self.current_char:
       match self.current_char:
         case c if c.isspace():
+          if c == "\n":
+            self.tokens.append(Token(TokenType.NEWLINE, LocationInfo(self.pos, self.pos+1, self.line, self.line_pos)))
+            self.line_pos = 0
+            self.line += 1
+            self.next_char()
+            continue
           self.tokens.append(Token(TokenType.WHITESPACE, LocationInfo(self.pos, self.pos+1, self.line, self.line_pos)))
           self.next_char()
         case c if c == "\n":
