@@ -27,5 +27,10 @@ class TestLexer(unittest.TestCase):
     lexer.lex()
     self.assertEqual(lexer.tokens[0].type, TokenType.NUMBER)
 
+  def test_operator(self):
+    lexer = Lexer("+")
+    lexer.lex()
+    self.assertEqual(lexer.tokens[0].type, TokenType.OPERATOR)
+
 if __name__ == "__main__":
   unittest.main()

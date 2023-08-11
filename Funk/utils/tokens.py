@@ -1,11 +1,16 @@
 from enum import Enum
 
-class LocationInfo:
-  def __init__(self, start_pos, end_pos, line, line_pos) -> None:
-    self.start_pos = start_pos
-    self.end_pos = end_pos
-    self.line = line
-    self.line_pos = line_pos
+OPERATORS = ["+", "-", "*", "/"]
+
+# class LocationInfo:
+#   def __init__(self, start_pos, end_pos, line, line_pos) -> None:
+#     self.start_pos = start_pos
+#     self.end_pos = end_pos
+#     self.line = line
+#     self.line_pos = line_pos
+
+#   def __repr__(self) -> str:
+#     return f"<Start: {self.start_pos}, End: {self.end_pos}, Line: {self.line}, Line Position: {self.line_pos}>"
 
 class TokenType(Enum):
   NUMBER = 0
@@ -19,6 +24,9 @@ class TokenType(Enum):
   LPar = 8
 
 class Token:
-  def __init__(self, type, location: LocationInfo) -> None:
+  def __init__(self, type, value: str) -> None:
     self.type = type
-    self.location = location
+    self.value = value
+  
+  def __repr__(self) -> str:
+    return f"<Type: {self.type}>, Value: {self.value}>"
