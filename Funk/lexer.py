@@ -2,12 +2,12 @@ from .utils.tokens import *
 
 class Lexer:
   def __init__(self, source_code):
-    self.source_code = source_code
+    self.source_code: str = source_code
     self.current_char: str = None
-    self.pos = -1
-    self.line = 1
-    self.line_pos = 0
-    self.tokens = []
+    self.pos: int = -1
+    self.line: int = 1
+    self.line_pos: int = 0
+    self.tokens: list[Token] = []
 
   def next_char(self):
     if not self.source_code:
@@ -37,7 +37,7 @@ class Lexer:
         case c if c in OPERATORS:
           self.tokens.append(self.handle_operators())
         case c if c.startswith("_") or c.isalpha():
-          self.tokens.append(self.handle_keywords())
+          self.tokens.append(self.handle_keywords_and_variables())
         case _:
           # TODO: Make an Exception called UnknownCharacter and raise it
           self.next_char()
@@ -68,5 +68,12 @@ class Lexer:
       self.next_char()
     return Token(TokenType.OPERATOR, value)
   
-  def handle_keywords(self) -> Token:
-    pass
+  def handle_keywords_and_variables(self) -> Token:
+    value = self.current_char
+    self.next_char()
+    while self.current_char and (self.current_char.isalnum() or self.current_char == "_"):
+      value += self.current_char
+      self.next_char()
+    if value in KEYWORDS:
+      return Token(TokenType.KEYWORD, value)
+    return Token(TokenType.IDENTIFIER, value)
