@@ -38,6 +38,12 @@ class Lexer:
           self.tokens.append(self.handle_operators())
         case c if c.startswith("_") or c.isalpha():
           self.tokens.append(self.handle_keywords_and_variables())
+        case c if c == "(":
+          self.tokens.append(Token(TokenType.LPar, self.current_char))
+          self.next_char()
+        case c if c == ")":
+          self.tokens.append(Token(TokenType.RPar, self.current_char))
+          self.next_char()
         case _:
           # TODO: Make an Exception called UnknownCharacter and raise it
           self.next_char()
