@@ -36,6 +36,8 @@ class Lexer:
           self.tokens.append(self.handle_strings())
         case c if c in OPERATORS:
           self.tokens.append(self.handle_operators())
+        case c if c.startswith("_") or c.isalpha():
+          self.tokens.append(self.handle_keywords())
         case _:
           # TODO: Make an Exception called UnknownCharacter and raise it
           self.next_char()
@@ -65,3 +67,6 @@ class Lexer:
       value += self.current_char
       self.next_char()
     return Token(TokenType.OPERATOR, value)
+  
+  def handle_keywords(self) -> Token:
+    pass

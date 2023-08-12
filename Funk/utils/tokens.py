@@ -2,6 +2,8 @@ from enum import Enum
 
 OPERATORS = ["+", "-", "*", "/"]
 
+KEYWORDS = ["if", "elif", "else", "funk", "while", "var"]
+
 # class LocationInfo:
 #   def __init__(self, start_pos, end_pos, line, line_pos) -> None:
 #     self.start_pos = start_pos
