@@ -1,7 +1,11 @@
 from enum import Enum
 
-OPERATORS = ["+", "-", "*", "/"]
+OPERATORS = ["+", "-", "*", "/", "="]
 
+KEYWORDS = ["if", "elif", "else", "funk", "while", "var"]
+
+
+# TODO: Store a token's index range to fetch when needed from source code, instead of the actual value. This was broken, should revisit.
 # class LocationInfo:
 #   def __init__(self, start_pos, end_pos, line, line_pos) -> None:
 #     self.start_pos = start_pos

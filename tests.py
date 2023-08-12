@@ -32,5 +32,25 @@ class TestLexer(unittest.TestCase):
     lexer.lex()
     self.assertEqual(lexer.tokens[0].type, TokenType.OPERATOR)
 
+  def test_keywords(self):
+    lexer = Lexer("var")
+    lexer.lex()
+    self.assertEqual(lexer.tokens[0].type, TokenType.KEYWORD)
+
+  def test_identifiers(self):
+    lexer = Lexer("number_1_row_8")
+    lexer.lex()
+    self.assertEqual(lexer.tokens[0].type, TokenType.IDENTIFIER)
+
+  def test_lpar(self):
+    lexer = Lexer("(")
+    lexer.lex()
+    self.assertEqual(lexer.tokens[0].type, TokenType.LPar)
+
+  def test_rpar(self):
+    lexer = Lexer(")")
+    lexer.lex()
+    self.assertEqual(lexer.tokens[0].type, TokenType.RPar)
+
 if __name__ == "__main__":
   unittest.main()
