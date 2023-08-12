@@ -1,6 +1,6 @@
 from enum import Enum
 
-OPERATORS = ["+", "-", "*", "/"]
+OPERATORS = ["+", "-", "*", "/", "="]
 
 KEYWORDS = ["if", "elif", "else", "funk", "while", "var"]
 
