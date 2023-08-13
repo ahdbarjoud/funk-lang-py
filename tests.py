@@ -52,5 +52,15 @@ class TestLexer(unittest.TestCase):
     lexer.lex()
     self.assertEqual(lexer.tokens[0].type, TokenType.RPar)
 
+  def test_rbrac(self):
+    lexer = Lexer("}")
+    lexer.lex()
+    self.assertEqual(lexer.tokens[0].type, TokenType.RBrac)
+
+  def test_lpar(self):
+    lexer = Lexer("{")
+    lexer.lex()
+    self.assertEqual(lexer.tokens[0].type, TokenType.LBrac)
+
 if __name__ == "__main__":
   unittest.main()

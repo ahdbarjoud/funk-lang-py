@@ -26,6 +26,8 @@ class TokenType(Enum):
   IDENTIFIER = 6
   RPar = 7
   LPar = 8
+  RBrac = 9
+  LBrac = 10
 
 class Token:
   def __init__(self, type, value: str) -> None:

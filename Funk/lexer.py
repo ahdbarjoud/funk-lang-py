@@ -44,6 +44,12 @@ class Lexer:
         case c if c == ")":
           self.tokens.append(Token(TokenType.RPar, self.current_char))
           self.next_char()
+        case c if c == "{":
+          self.tokens.append(Token(TokenType.LBrac, self.current_char))
+          self.next_char()
+        case c if c == "}":
+          self.tokens.append(Token(TokenType.RBrac, self.current_char))
+          self.next_char()
         case _:
           # TODO: Make an Exception called UnknownCharacter and raise it
           self.next_char()
